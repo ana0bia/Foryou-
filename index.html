@@ -4,1003 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Nosso Cantinho 💜</title>
-
-  <style>
-    :root {
-      --azul-900: #0d1030;
-      --azul-800: #141a4a;
-      --azul-700: #1f2770;
-      --azul-600: #2d3a94;
-      --azul-500: #3e51b8;
-      --azul-400: #5f70d4;
-      --roxo-900: #221040;
-      --roxo-800: #341a5e;
-      --roxo-700: #4d2a80;
-      --roxo-600: #6d3ea8;
-      --roxo-500: #8b5cc9;
-      --roxo-400: #ab7ee0;
-      --roxo-300: #c8a5ee;
-      --branco: #ffffff;
-      --branco-suave: #edeaff;
-      --texto-suave: #b8b4dc;
-      --texto-muted: #8583a8;
-      --grad-principal: linear-gradient(135deg, #3e51b8 0%, #8b5cc9 100%);
-      --grad-bg: radial-gradient(circle at 20% 0%, #2d1a5e 0%, #141a4a 40%, #0d1030 100%);
-      --sombra-suave: 0 8px 30px rgba(0, 0, 0, 0.25);
-      --sombra-media: 0 16px 50px rgba(0, 0, 0, 0.35);
-      --sombra-glow: 0 20px 60px rgba(139, 92, 201, 0.35);
-      --borda-sutil: 1px solid rgba(200, 165, 238, 0.15);
-      --borda-media: 1px solid rgba(200, 165, 238, 0.25);
-      --radius-sm: 12px;
-      --radius-md: 18px;
-      --radius-lg: 24px;
-      --radius-xl: 32px;
-    }
-
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
-      -webkit-font-smoothing: antialiased;
-    }
-
-    html { scroll-behavior: smooth; }
-
-    body {
-      min-height: 100vh;
-      background: var(--grad-bg);
-      background-attachment: fixed;
-      color: var(--branco-suave);
-      overflow-x: hidden;
-      line-height: 1.5;
-    }
-
-    ::-webkit-scrollbar { width: 10px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb {
-      background: linear-gradient(180deg, var(--azul-500), var(--roxo-500));
-      border-radius: 10px;
-    }
-
-    .screen {
-      display: none;
-      min-height: 100vh;
-      padding: 32px 24px;
-      align-items: center;
-      justify-content: flex-start;
-      flex-direction: column;
-    }
-
-    .screen.active {
-      display: flex;
-      animation: fadeIn 0.7s cubic-bezier(0.2, 0.8, 0.2, 1);
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(30px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    @keyframes float {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-6px); }
-    }
-
-    /* ====== TELA DE ESCOLHA ====== */
-    .user-choice-card {
-      max-width: 620px;
-      width: 100%;
-      padding: 56px 44px;
-      border-radius: var(--radius-xl);
-      background: linear-gradient(135deg, rgba(139, 92, 201, 0.18), rgba(62, 81, 184, 0.08));
-      backdrop-filter: blur(24px);
-      -webkit-backdrop-filter: blur(24px);
-      border: var(--borda-media);
-      box-shadow: var(--sombra-glow);
-      text-align: center;
-      margin: auto;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .user-choice-card::before {
-      content: '';
-      position: absolute;
-      top: -50%; left: -50%;
-      width: 200%; height: 200%;
-      background: radial-gradient(circle, rgba(139, 92, 201, 0.15) 0%, transparent 60%);
-      pointer-events: none;
-      animation: float 8s ease-in-out infinite;
-    }
-
-    .user-choice-card > * { position: relative; z-index: 1; }
-
-    .user-choice-title {
-      font-size: 1.8rem;
-      font-weight: 700;
-      background: linear-gradient(90deg, #c8a5ee 0%, #5f70d4 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      margin-bottom: 10px;
-      letter-spacing: -0.5px;
-    }
-
-    .user-choice-sub {
-      font-size: 1rem;
-      color: var(--texto-suave);
-      margin-bottom: 40px;
-    }
-
-    .user-choice-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 20px;
-    }
-
-    @media (max-width: 500px) {
-      .user-choice-grid { grid-template-columns: 1fr; }
-    }
-
-    .user-btn {
-      padding: 36px 20px;
-      border-radius: var(--radius-lg);
-      background: rgba(13, 16, 48, 0.5);
-      border: 2px solid rgba(200, 165, 238, 0.25);
-      cursor: pointer;
-      transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
-      text-align: center;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 14px;
-      font-family: inherit;
-      color: inherit;
-    }
-
-    .user-btn:hover {
-      transform: translateY(-6px);
-      box-shadow: var(--sombra-glow);
-    }
-
-    .user-btn[data-user="ana"]:hover {
-      border-color: #5f70d4;
-      background: rgba(62, 81, 184, 0.25);
-    }
-
-    .user-btn[data-user="joao"]:hover {
-      border-color: #ab7ee0;
-      background: rgba(139, 92, 201, 0.25);
-    }
-
-    .user-btn-emoji { font-size: 3.2rem; line-height: 1; }
-    .user-btn-name { font-size: 1.05rem; font-weight: 700; letter-spacing: 0.3px; line-height: 1.3; }
-    .user-btn[data-user="ana"] .user-btn-name { color: #a0b0f0; }
-    .user-btn[data-user="joao"] .user-btn-name { color: #c8a5ee; }
-
-    .switch-user-btn {
-      position: fixed;
-      top: 20px; right: 20px;
-      z-index: 50;
-      padding: 10px 18px;
-      border-radius: 50px;
-      background: rgba(13, 16, 48, 0.7);
-      backdrop-filter: blur(12px);
-      border: var(--borda-media);
-      color: var(--texto-suave);
-      font-size: 0.82rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      font-family: inherit;
-      display: none;
-    }
-
-    .switch-user-btn.visible { display: block; }
-
-    .switch-user-btn:hover {
-      background: rgba(139, 92, 201, 0.25);
-      color: var(--branco);
-      transform: translateY(-2px);
-    }
-
-    /* ====== TELA DE ENTRADA ====== */
-    .welcome-card {
-      max-width: 620px;
-      width: 100%;
-      padding: 56px 44px;
-      border-radius: var(--radius-xl);
-      background: linear-gradient(135deg, rgba(139, 92, 201, 0.18), rgba(62, 81, 184, 0.08));
-      backdrop-filter: blur(24px);
-      -webkit-backdrop-filter: blur(24px);
-      border: var(--borda-media);
-      box-shadow: var(--sombra-glow);
-      text-align: center;
-      margin: auto;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .welcome-card::before {
-      content: '';
-      position: absolute;
-      top: -50%; left: -50%;
-      width: 200%; height: 200%;
-      background: radial-gradient(circle, rgba(139, 92, 201, 0.15) 0%, transparent 60%);
-      pointer-events: none;
-      animation: float 8s ease-in-out infinite;
-    }
-
-    .welcome-card > * { position: relative; z-index: 1; }
-
-    .greeting-time {
-      display: inline-block;
-      font-size: 0.72rem;
-      letter-spacing: 4px;
-      text-transform: uppercase;
-      color: var(--roxo-300);
-      margin-bottom: 20px;
-      padding: 8px 18px;
-      border-radius: 50px;
-      background: rgba(139, 92, 201, 0.15);
-      border: 1px solid rgba(200, 165, 238, 0.2);
-      font-weight: 600;
-    }
-
-    .welcome-title {
-      font-size: 2.4rem;
-      font-weight: 700;
-      background: linear-gradient(90deg, #c8a5ee 0%, #5f70d4 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      margin-bottom: 12px;
-      line-height: 1.2;
-      letter-spacing: -0.5px;
-    }
-
-    .welcome-message {
-      font-size: 1.02rem;
-      line-height: 1.7;
-      color: var(--texto-suave);
-      margin-bottom: 32px;
-      font-style: italic;
-    }
-
-    .flirt-box {
-      margin-bottom: 32px;
-      padding: 28px 24px;
-      border-radius: var(--radius-lg);
-      background: linear-gradient(135deg, rgba(139, 92, 201, 0.12), rgba(62, 81, 184, 0.05));
-      border: 1px dashed rgba(200, 165, 238, 0.35);
-      min-height: 140px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.4s ease;
-    }
-
-    .flirt-badge {
-      display: inline-block;
-      font-size: 0.68rem;
-      letter-spacing: 2.5px;
-      text-transform: uppercase;
-      padding: 6px 14px;
-      border-radius: 50px;
-      background: linear-gradient(135deg, rgba(139, 92, 201, 0.35), rgba(62, 81, 184, 0.25));
-      color: var(--roxo-300);
-      margin-bottom: 14px;
-      font-weight: 700;
-    }
-
-    .flirt-text {
-      font-size: 1.08rem;
-      line-height: 1.65;
-      color: var(--branco-suave);
-      font-style: italic;
-      transition: opacity 0.4s ease;
-    }
-
-    .welcome-actions {
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-      align-items: center;
-    }
-
-    /* ====== BOTÕES ====== */
-    .btn-primary {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      padding: 15px 38px;
-      font-size: 0.98rem;
-      font-weight: 700;
-      letter-spacing: 0.3px;
-      color: #fff;
-      background: var(--grad-principal);
-      border: none;
-      border-radius: 50px;
-      cursor: pointer;
-      transition: all 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
-      box-shadow: 0 8px 24px rgba(109, 62, 168, 0.45);
-      position: relative;
-      overflow: hidden;
-      font-family: inherit;
-    }
-
-    .btn-primary::after {
-      content: '';
-      position: absolute;
-      top: 0; left: -100%;
-      width: 100%; height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
-      transition: left 0.6s;
-    }
-
-    .btn-primary:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 14px 36px rgba(139, 92, 201, 0.55);
-    }
-
-    .btn-primary:hover::after { left: 100%; }
-    .btn-primary:disabled { opacity: 0.7; cursor: wait; transform: none; }
-
-    .btn-back {
-      align-self: flex-start;
-      margin-bottom: 28px;
-      padding: 11px 24px;
-      background: rgba(139, 92, 201, 0.1);
-      border: var(--borda-media);
-      color: var(--roxo-300);
-      border-radius: 50px;
-      cursor: pointer;
-      font-size: 0.88rem;
-      font-weight: 600;
-      transition: all 0.3s ease;
-      backdrop-filter: blur(10px);
-      font-family: inherit;
-    }
-
-    .btn-back:hover {
-      background: rgba(139, 92, 201, 0.22);
-      transform: translateX(-4px);
-    }
-
-    /* ====== NOSSO MUNDO ====== */
-    .world-container {
-      max-width: 1100px;
-      width: 100%;
-      display: flex;
-      flex-direction: column;
-      gap: 56px;
-    }
-
-    .world-header { text-align: center; }
-
-    .world-header h1 {
-      font-size: 3rem;
-      font-weight: 800;
-      background: linear-gradient(90deg, #c8a5ee 0%, #5f70d4 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      margin-bottom: 10px;
-      letter-spacing: -1px;
-    }
-
-    .world-header p {
-      color: var(--texto-suave);
-      font-size: 1rem;
-      letter-spacing: 0.3px;
-    }
-
-    .section-title {
-      font-size: 1.35rem;
-      font-weight: 700;
-      color: var(--branco-suave);
-      margin-bottom: 20px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      letter-spacing: -0.3px;
-    }
-
-    .section-title::before {
-      content: '';
-      width: 4px;
-      height: 24px;
-      background: var(--grad-principal);
-      border-radius: 4px;
-    }
-
-    .carousel-section { width: 100%; }
-
-    .carousel-label {
-      font-size: 0.75rem;
-      letter-spacing: 3px;
-      text-transform: uppercase;
-      color: var(--roxo-300);
-      margin-bottom: 16px;
-      text-align: center;
-      font-weight: 700;
-    }
-
-    .carousel {
-      width: 100%;
-      height: 440px;
-      border-radius: var(--radius-xl);
-      overflow: hidden;
-      position: relative;
-      background: linear-gradient(135deg, rgba(34, 16, 64, 0.6), rgba(20, 26, 74, 0.6));
-      border: var(--borda-media);
-      box-shadow: var(--sombra-media);
-    }
-
-    .carousel-slide {
-      position: absolute;
-      inset: 0;
-      opacity: 0;
-      transition: opacity 1.2s ease, transform 1.2s ease;
-      transform: scale(1.05);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .carousel-slide.active { opacity: 1; transform: scale(1); }
-    .carousel-slide img { width: 100%; height: 100%; object-fit: cover; }
-
-    .carousel-caption {
-      position: absolute;
-      bottom: 0; left: 0; right: 0;
-      padding: 32px 28px 24px;
-      background: linear-gradient(to top, rgba(13, 16, 48, 0.98) 0%, rgba(13, 16, 48, 0.6) 60%, transparent 100%);
-      font-size: 1.05rem;
-      font-weight: 600;
-      color: var(--branco);
-      letter-spacing: 0.3px;
-    }
-
-    .carousel-empty {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-direction: column;
-      gap: 14px;
-      color: var(--texto-suave);
-      text-align: center;
-      padding: 24px;
-    }
-
-    .carousel-empty span { font-size: 3.5rem; opacity: 0.6; }
-    .carousel-empty p { font-size: 1rem; }
-
-    .carousel-dots {
-      display: flex;
-      justify-content: center;
-      gap: 8px;
-      margin-top: 20px;
-    }
-
-    .dot {
-      width: 8px; height: 8px;
-      border-radius: 50%;
-      background: rgba(200, 165, 238, 0.25);
-      transition: all 0.4s ease;
-      cursor: pointer;
-    }
-
-    .dot.active {
-      background: var(--grad-principal);
-      width: 28px;
-      border-radius: 4px;
-    }
-
-    /* ====== QUADRADOS ====== */
-    .photo-squares {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 20px;
-      width: 100%;
-    }
-
-    .photo-square {
-      padding: 36px 28px;
-      border-radius: var(--radius-lg);
-      background: linear-gradient(135deg, rgba(139, 92, 201, 0.12), rgba(62, 81, 184, 0.05));
-      backdrop-filter: blur(16px);
-      border: var(--borda-media);
-      cursor: pointer;
-      transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
-      text-align: center;
-      min-height: 200px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 12px;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .photo-square::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: radial-gradient(circle at 50% 0%, rgba(139, 92, 201, 0.15), transparent 70%);
-      opacity: 0;
-      transition: opacity 0.4s;
-    }
-
-    .photo-square:hover {
-      transform: translateY(-6px);
-      border-color: rgba(200, 165, 238, 0.5);
-      box-shadow: var(--sombra-glow);
-    }
-
-    .photo-square:hover::before { opacity: 1; }
-    .photo-square > * { position: relative; z-index: 1; }
-
-    .photo-square-icon { font-size: 2.8rem; }
-    .photo-square-title { font-size: 1.15rem; font-weight: 700; color: var(--branco); }
-    .photo-square-desc { font-size: 0.88rem; color: var(--texto-suave); }
-
-    /* ====== FORMULÁRIOS ====== */
-    .note-input-area {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      margin-bottom: 32px;
-      padding: 28px;
-      border-radius: var(--radius-lg);
-      background: linear-gradient(135deg, rgba(139, 92, 201, 0.1), rgba(62, 81, 184, 0.05));
-      border: var(--borda-media);
-      backdrop-filter: blur(12px);
-    }
-
-    .note-input-area input,
-    .note-input-area textarea,
-    .note-input-area select {
-      padding: 15px 20px;
-      border-radius: var(--radius-sm);
-      border: var(--borda-media);
-      background: rgba(13, 16, 48, 0.6);
-      color: var(--branco-suave);
-      font-size: 0.95rem;
-      outline: none;
-      font-family: inherit;
-      resize: vertical;
-      transition: all 0.3s ease;
-    }
-
-    .note-input-area input:focus,
-    .note-input-area textarea:focus,
-    .note-input-area select:focus {
-      border-color: var(--roxo-400);
-      background: rgba(13, 16, 48, 0.85);
-      box-shadow: 0 0 0 4px rgba(139, 92, 201, 0.15);
-    }
-
-    .note-input-area input::placeholder,
-    .note-input-area textarea::placeholder { color: var(--texto-muted); }
-
-    .note-input-area textarea { min-height: 90px; }
-
-    .note-input-row {
-      display: flex;
-      gap: 12px;
-      align-items: center;
-    }
-
-    .note-input-row input { flex: 1; }
-
-    .auto-author-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 12px 20px;
-      border-radius: var(--radius-sm);
-      background: rgba(139, 92, 201, 0.15);
-      border: 1px solid rgba(200, 165, 238, 0.25);
-      color: var(--roxo-300);
-      font-size: 0.88rem;
-      font-weight: 600;
-      white-space: nowrap;
-    }
-
-    .locked-info {
-      font-size: 0.8rem;
-      color: var(--texto-muted);
-      font-style: italic;
-      margin-top: 4px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    /* ====== MURAL ====== */
-    .mural-section { width: 100%; }
-
-    .mural-grid {
-      column-count: 2;
-      column-gap: 20px;
-    }
-
-    @media (max-width: 700px) {
-      .mural-grid { column-count: 1; }
-    }
-
-    .mural-card {
-      break-inside: avoid;
-      margin-bottom: 20px;
-      border-radius: var(--radius-lg);
-      overflow: hidden;
-      background: linear-gradient(135deg, rgba(34, 16, 64, 0.5), rgba(20, 26, 74, 0.4));
-      border: var(--borda-media);
-      transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
-      display: flex;
-      flex-direction: row;
-      min-height: 240px;
-      box-shadow: var(--sombra-suave);
-    }
-
-    .mural-card:hover {
-      transform: translateY(-6px);
-      border-color: rgba(200, 165, 238, 0.5);
-      box-shadow: var(--sombra-glow);
-    }
-
-    .mural-photo {
-      flex: 1 1 55%;
-      position: relative;
-      overflow: hidden;
-      background: rgba(13, 16, 48, 0.5);
-      cursor: pointer;
-    }
-
-    .mural-photo img {
-      width: 100%; height: 100%;
-      object-fit: cover;
-      display: block;
-      transition: transform 0.7s cubic-bezier(0.2, 0.8, 0.2, 1);
-    }
-
-    .mural-card:hover .mural-photo img { transform: scale(1.08); }
-
-    .mural-photo-empty {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-direction: column;
-      gap: 10px;
-      color: var(--texto-muted);
-      font-size: 0.85rem;
-      height: 100%;
-      padding: 20px;
-      text-align: center;
-    }
-
-    .mural-photo-empty span { font-size: 2.5rem; opacity: 0.5; }
-
-    .mural-note {
-      flex: 1 1 45%;
-      padding: 26px 22px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      background: linear-gradient(135deg, rgba(139, 92, 201, 0.15), rgba(62, 81, 184, 0.08));
-      position: relative;
-    }
-
-    .mural-note-badge {
-      font-size: 0.68rem;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      color: var(--roxo-300);
-      margin-bottom: 14px;
-      font-weight: 700;
-    }
-
-    .mural-note-author {
-      font-size: 0.82rem;
-      color: var(--roxo-300);
-      font-weight: 700;
-      letter-spacing: 1.2px;
-      text-transform: uppercase;
-      margin-bottom: 10px;
-    }
-
-    .mural-note-text {
-      font-size: 0.98rem;
-      line-height: 1.65;
-      color: var(--branco-suave);
-      white-space: pre-wrap;
-      word-break: break-word;
-      font-style: italic;
-    }
-
-    .mural-note-date {
-      font-size: 0.72rem;
-      color: var(--texto-muted);
-      margin-top: 16px;
-      letter-spacing: 0.5px;
-    }
-
-    .mural-note-empty {
-      font-size: 0.92rem;
-      color: var(--texto-muted);
-      font-style: italic;
-      text-align: center;
-      opacity: 0.8;
-    }
-
-    /* ====== JOGOS ====== */
-    .games-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 18px;
-      width: 100%;
-    }
-
-    .game-card {
-      padding: 36px 24px;
-      border-radius: var(--radius-lg);
-      background: linear-gradient(135deg, rgba(139, 92, 201, 0.1), rgba(62, 81, 184, 0.05));
-      border: var(--borda-media);
-      text-align: center;
-      cursor: pointer;
-      transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .game-card::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0;
-      width: 100%; height: 3px;
-      background: var(--grad-principal);
-      transform: scaleX(0);
-      transform-origin: left;
-      transition: transform 0.4s ease;
-    }
-
-    .game-card:hover {
-      transform: translateY(-6px);
-      border-color: rgba(200, 165, 238, 0.5);
-      box-shadow: var(--sombra-glow);
-    }
-
-    .game-card:hover::before { transform: scaleX(1); }
-
-    .game-icon { font-size: 2.6rem; display: block; margin-bottom: 12px; }
-    .game-title { font-size: 1.1rem; font-weight: 700; color: var(--branco); margin-bottom: 4px; }
-    .game-desc { font-size: 0.88rem; color: var(--texto-suave); }
-
-    /* ====== FRASE ====== */
-    .phrase-card {
-      padding: 40px 32px;
-      border-radius: var(--radius-lg);
-      background: linear-gradient(135deg, rgba(139, 92, 201, 0.12), rgba(62, 81, 184, 0.06));
-      border: 1px dashed rgba(200, 165, 238, 0.35);
-      text-align: center;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .phrase-card::before {
-      content: '"';
-      position: absolute;
-      top: -30px; left: 20px;
-      font-size: 8rem;
-      color: rgba(139, 92, 201, 0.15);
-      font-family: Georgia, serif;
-      line-height: 1;
-    }
-
-    .phrase-text {
-      font-size: 1.15rem;
-      font-style: italic;
-      line-height: 1.75;
-      color: var(--branco-suave);
-      margin-bottom: 18px;
-      position: relative;
-      z-index: 1;
-    }
-
-    .phrase-author {
-      font-size: 0.85rem;
-      color: var(--roxo-300);
-      letter-spacing: 1.5px;
-      font-weight: 600;
-      text-transform: uppercase;
-    }
-
-    .btn-small {
-      padding: 11px 26px;
-      font-size: 0.85rem;
-      font-weight: 700;
-      color: var(--roxo-300);
-      background: transparent;
-      border: 1.5px solid var(--roxo-400);
-      border-radius: 50px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      letter-spacing: 0.5px;
-      font-family: inherit;
-    }
-
-    .btn-small:hover {
-      background: rgba(139, 92, 201, 0.2);
-      border-color: var(--roxo-300);
-      transform: translateY(-2px);
-    }
-
-    /* ====== RANKING ====== */
-    .ranking-container { max-width: 680px; width: 100%; }
-    .ranking-list { list-style: none; }
-
-    .ranking-list li {
-      padding: 18px 22px;
-      margin-bottom: 12px;
-      border-radius: var(--radius-md);
-      background: linear-gradient(135deg, rgba(62, 81, 184, 0.18), rgba(139, 92, 201, 0.08));
-      border-left: 4px solid var(--roxo-500);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 1rem;
-      transition: all 0.3s ease;
-    }
-
-    .ranking-list li:hover {
-      transform: translateX(6px);
-      background: linear-gradient(135deg, rgba(62, 81, 184, 0.28), rgba(139, 92, 201, 0.15));
-    }
-
-    .ranking-list li:nth-child(1) { border-left-color: #ffd700; background: linear-gradient(135deg, rgba(255, 215, 0, 0.12), rgba(255, 215, 0, 0.04)); }
-    .ranking-list li:nth-child(2) { border-left-color: #c0c0c0; }
-    .ranking-list li:nth-child(3) { border-left-color: #cd7f32; }
-
-    .ranking-list li strong {
-      font-size: 1.15rem;
-      background: var(--grad-principal);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      font-weight: 800;
-    }
-
-    .ranking-empty { text-align: center; padding: 50px 20px; color: var(--texto-suave); }
-    .ranking-empty span { font-size: 3.5rem; display: block; margin-bottom: 16px; opacity: 0.6; }
-    .ranking-info {
-      text-align: center;
-      font-size: 0.9rem;
-      color: var(--texto-suave);
-      margin-bottom: 24px;
-      font-style: italic;
-    }
-
-    /* ====== GALERIA ====== */
-    .gallery-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-      gap: 18px;
-      max-width: 1000px;
-      width: 100%;
-    }
-
-    .photo-card {
-      aspect-ratio: 1 / 1;
-      border-radius: var(--radius-md);
-      overflow: hidden;
-      background: rgba(13, 16, 48, 0.5);
-      border: var(--borda-media);
-      position: relative;
-      cursor: pointer;
-      transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
-    }
-
-    .photo-card:hover {
-      transform: scale(1.03) translateY(-4px);
-      box-shadow: var(--sombra-glow);
-      border-color: rgba(200, 165, 238, 0.5);
-    }
-
-    .photo-card img {
-      width: 100%; height: 100%;
-      object-fit: cover;
-      display: block;
-      transition: transform 0.6s ease;
-    }
-
-    .photo-card:hover img { transform: scale(1.08); }
-
-    .photo-caption {
-      position: absolute;
-      bottom: 0; left: 0; right: 0;
-      padding: 16px 14px;
-      background: linear-gradient(to top, rgba(13, 16, 48, 0.98), transparent);
-      font-size: 0.88rem;
-      color: var(--branco-suave);
-      font-weight: 500;
-    }
-
-    .empty-gallery {
-      text-align: center;
-      padding: 70px 20px;
-      color: var(--texto-suave);
-      grid-column: 1 / -1;
-    }
-
-    .empty-gallery span { font-size: 3.5rem; display: block; margin-bottom: 16px; opacity: 0.5; }
-
-    /* ====== MODAL ====== */
-    .modal {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(6, 8, 24, 0.95);
-      backdrop-filter: blur(12px);
-      z-index: 100;
-      align-items: center;
-      justify-content: center;
-      padding: 24px;
-    }
-
-    .modal.active { display: flex; animation: fadeIn 0.3s ease; }
-
-    .modal img {
-      max-width: 92vw;
-      max-height: 88vh;
-      border-radius: var(--radius-lg);
-      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.7);
-    }
-
-    .modal-close {
-      position: absolute;
-      top: 24px; right: 24px;
-      background: rgba(139, 92, 201, 0.2);
-      border: var(--borda-media);
-      color: var(--branco);
-      width: 46px; height: 46px;
-      border-radius: 50%;
-      font-size: 1.5rem;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-family: inherit;
-    }
-
-    .modal-close:hover {
-      background: rgba(139, 92, 201, 0.4);
-      transform: rotate(90deg);
-    }
-
-    @media (max-width: 600px) {
-      .welcome-card { padding: 40px 26px; }
-      .welcome-title { font-size: 1.7rem; }
-      .welcome-message { font-size: 1rem; }
-      .world-header h1 { font-size: 2rem; }
-      .carousel { height: 280px; }
-      .mural-card { flex-direction: column; }
-      .mural-photo { min-height: 200px; }
-      .note-input-row { flex-direction: column; }
-      .note-input-row input,
-      .note-input-row select,
-      .note-input-row button { width: 100%; }
-      .section-title { font-size: 1.15rem; }
-      .user-choice-card { padding: 40px 26px; }
-      .user-choice-title { font-size: 1.4rem; }
-      .user-btn-name { font-size: 0.95rem; }
-    }
-  </style>
+  
+  <!-- Fonte do Google para o estilo de jogo -->
+  <link href="https://fonts.googleapis.com/css2?family=Titan+One&display=swap" rel="stylesheet">
+  
+  <!-- Link para o arquivo CSS -->
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
@@ -1011,7 +20,6 @@
     <div class="user-choice-card">
       <h1 class="user-choice-title">Bem-vindo(a) 💙💜</h1>
       <p class="user-choice-sub">Quem está acessando?</p>
-
       <div class="user-choice-grid">
         <button class="user-btn" data-user="ana">
           <span class="user-btn-emoji">💙</span>
@@ -1031,12 +39,10 @@
       <p id="greetingTime" class="greeting-time"></p>
       <h1 id="welcomeTitle" class="welcome-title"></h1>
       <p class="welcome-message" id="personalWelcome">Que bom te ver por aqui 💜</p>
-
       <div class="flirt-box" id="phraseRevealBox">
         <span class="flirt-badge" id="phraseBadge">✨ Frase do dia</span>
         <p id="phraseReveal" class="flirt-text">Clique no botão abaixo para descobrir a mensagem de hoje 💌</p>
       </div>
-
       <div class="welcome-actions">
         <button id="revealPhraseBtn" class="btn-primary">Qual a frase de hoje? 💌</button>
         <button id="enterButton" class="btn-primary" style="display:none;">Entrar ✨</button>
@@ -1047,7 +53,6 @@
   <!-- TELA 2: NOSSO MUNDO -->
   <section id="worldScreen" class="screen">
     <div class="world-container">
-
       <div class="world-header">
         <h1>Nosso Mundo 💙💜</h1>
         <p>Tudo o que somos, em um só lugar</p>
@@ -1072,6 +77,30 @@
         </div>
       </div>
 
+      <!-- BICHINHO PREVIEW -->
+      <div>
+        <h2 class="section-title">🐰 Nosso Bichinho</h2>
+        <div class="pet-main-scene" id="petSceneHome" style="cursor:pointer;">
+          <div class="pet-window"></div>
+          <div class="pet-name-plate" style="position:absolute; top:8%; left:50%; transform:translateX(-50%); background:rgba(13,16,48,0.7); padding:4px 12px; border-radius:50px; font-size:0.85rem; font-weight:700; color:var(--roxo-300); z-index:5;">Bichinho</div>
+          <div class="pet-score-badge" id="petScoreBadge" style="position:absolute; top:8%; right:8%; background:var(--grad-principal); padding:8px 16px; border-radius:50px; font-weight:700; font-size:0.9rem; z-index:5;">⭐ 0 pts</div>
+          
+          <div class="moy-container mini" id="moyHome">
+            <div class="moy-body">
+              <div class="moy-belly"></div>
+              <div class="moy-eyes">
+                <div class="moy-eye"><div class="moy-pupil"></div></div>
+                <div class="moy-eye"><div class="moy-pupil"></div></div>
+              </div>
+              <div class="moy-blush left"></div>
+              <div class="moy-blush right"></div>
+              <div class="moy-mouth"></div>
+            </div>
+          </div>
+        </div>
+        <p style="text-align:center;color:var(--texto-suave);font-size:0.9rem;font-style:italic; margin-bottom:32px;">Toque no bichinho para entrar no jogo 💜</p>
+      </div>
+
       <div>
         <h2 class="section-title">📸 Adicionar Foto</h2>
         <div class="note-input-area">
@@ -1088,20 +117,15 @@
       <div>
         <h2 class="section-title">🎮 Jogos</h2>
         <div class="games-grid">
+          <div class="game-card" data-game="pet">
+            <span class="game-icon">🐰</span>
+            <h3 class="game-title">Cuidar do Bichinho</h3>
+            <p class="game-desc">Jogue, compre e cuide</p>
+          </div>
           <div class="game-card" data-game="ranking">
             <span class="game-icon">🏆</span>
             <h3 class="game-title">Ranking</h3>
             <p class="game-desc">Veja quem está ganhando</p>
-          </div>
-          <div class="game-card" data-game="soon1">
-            <span class="game-icon">🎯</span>
-            <h3 class="game-title">Em breve</h3>
-            <p class="game-desc">Novo jogo chegando...</p>
-          </div>
-          <div class="game-card" data-game="soon2">
-            <span class="game-icon">💭</span>
-            <h3 class="game-title">Em breve</h3>
-            <p class="game-desc">Novo jogo chegando...</p>
           </div>
         </div>
       </div>
@@ -1118,7 +142,6 @@
 
       <div class="mural-section">
         <h2 class="section-title">📌 Nosso mural</h2>
-
         <div class="note-input-area">
           <div class="note-input-row">
             <span class="auto-author-badge" id="noteAuthorBadge">💙 Eu</span>
@@ -1127,7 +150,6 @@
           <button class="btn-primary" id="addNoteBtn">Publicar 💌</button>
           <p class="locked-info">🔒 A nota aparece apenas no seu quadro pessoal</p>
         </div>
-
         <div class="mural-grid" id="muralGrid"></div>
       </div>
 
@@ -1137,12 +159,10 @@
   <!-- TELA 3: RANKING -->
   <section id="rankingScreen" class="screen">
     <button class="btn-back" data-back>← Voltar</button>
-
     <div class="world-header" style="margin-bottom:32px;">
       <h1>🏆 Nosso Ranking</h1>
       <p>Cada ponto é uma memória 💙💜</p>
     </div>
-
     <div class="ranking-container">
       <p class="ranking-info">As pontuações chegam automaticamente quando vocês jogarem 🎮</p>
       <div class="phrase-card">
@@ -1155,672 +175,231 @@
   <!-- TELA 4: GALERIA -->
   <section id="galleryScreen" class="screen">
     <button class="btn-back" data-back>← Voltar</button>
-
     <div class="world-header" style="margin-bottom:32px;">
       <h1 id="galleryTitle">📸 Nossas Fotos</h1>
       <p>Momentos que guardamos 💜</p>
     </div>
-
     <div class="gallery-grid" id="galleryGrid"></div>
   </section>
 
-  <!-- MODAL DE FOTO -->
+  <!-- TELA 5: JOGO DO BICHINHO (HUB) -->
+  <section id="petGameScreen" class="screen">
+    <button class="btn-back" data-back style="position:absolute; top:20px; left:20px; z-index:100;">← Voltar</button>
+    <div class="pet-game-layout">
+      <div class="pet-top-bar">
+        <div class="pet-stats-mini">
+          <div class="stat-mini">🍕 <div class="stat-bar-mini"><div class="stat-fill-mini fill-fome" id="miniFome"></div></div></div>
+          <div class="stat-mini">💤 <div class="stat-bar-mini"><div class="stat-fill-mini fill-energia" id="miniEnergia"></div></div></div>
+          <div class="stat-mini">❤️ <div class="stat-bar-mini"><div class="stat-fill-mini fill-saude" id="miniSaude"></div></div></div>
+          <div class="stat-mini">😊 <div class="stat-bar-mini"><div class="stat-fill-mini fill-alegria" id="miniAlegria"></div></div></div>
+        </div>
+        <div class="pet-wallet">🪙 <span id="petCoins">0</span></div>
+      </div>
+      <div class="pet-main-scene" id="petMainScene">
+        <div class="sleep-overlay"></div>
+        <div class="zzz-anim">Zzz...</div>
+        <div class="pet-window"></div>
+        <div class="pet-name-plate" style="position:absolute; top:8%; left:50%; transform:translateX(-50%); background:rgba(13,16,48,0.7); padding:4px 12px; border-radius:50px; font-size:0.85rem; font-weight:700; color:var(--roxo-300); z-index:5;">Bichinho</div>
+        
+        <div class="moy-container" id="moyBig">
+          <div class="moy-body">
+            <div class="moy-belly"></div>
+            <div class="moy-eyes">
+              <div class="moy-eye"><div class="moy-pupil"></div></div>
+              <div class="moy-eye"><div class="moy-pupil"></div></div>
+            </div>
+            <div class="moy-blush left"></div>
+            <div class="moy-blush right"></div>
+            <div class="moy-mouth"></div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="pet-actions">
+        <button class="pet-btn" onclick="abrirMercado()"><span>🛒</span><small>Mercado</small></button>
+        <button class="pet-btn games-btn" onclick="abrirHubJogos()"><span>🎮</span><small>Jogos</small></button>
+        <button class="pet-btn" onclick="toggleDormir()" id="btnDormir"><span>💤</span><small>Dormir</small></button>
+        <button class="pet-btn" onclick="usarRemedio()"><span>💊</span><small>Remédio</small></button>
+      </div>
+    </div>
+  </section>
+
+  <!-- OVERLAY: MERCADO -->
+  <div class="pet-overlay" id="overlayMercado">
+    <div class="overlay-content">
+      <h2 class="overlay-title">🛒 Mercadinho</h2>
+      <div class="shop-grid">
+        <div class="shop-item" onclick="comprarComida('maca', 5, 20, 5)">
+          <span class="shop-icon">🍎</span><span class="shop-name">Maçã</span><span class="shop-price">🪙 5</span>
+        </div>
+        <div class="shop-item" onclick="comprarComida('hamburguer', 15, 50, 10)">
+          <span class="shop-icon">🍔</span><span class="shop-name">Hambúrguer</span><span class="shop-price">🪙 15</span>
+        </div>
+        <div class="shop-item" onclick="comprarComida('bolo', 25, 100, 25)">
+          <span class="shop-icon">🍰</span><span class="shop-name">Bolo</span><span class="shop-price">🪙 25</span>
+        </div>
+      </div>
+      <button class="btn-primary" onclick="fecharOverlays()">Voltar</button>
+    </div>
+  </div>
+
+  <!-- OVERLAY: HUB DE JOGOS -->
+  <div class="pet-overlay" id="overlayHubJogos">
+    <div class="overlay-content">
+      <h2 class="overlay-title">🎮 Jogos</h2>
+      <p style="color:var(--texto-suave); font-size:0.9rem; margin-bottom:20px;">Jogue para ganhar moedas e comprar comidinhas 💰</p>
+      <div class="games-hub">
+        <button class="game-hub-item" onclick="abrirJogoVelha()">
+          <span class="game-hub-icon">⭕</span>
+          <span class="game-hub-title">Jogo da Velha</span>
+          <span class="game-hub-desc">Ganhe até 10 moedas</span>
+        </button>
+        <button class="game-hub-item" onclick="abrirJogoCores()">
+          <span class="game-hub-icon">🌈</span>
+          <span class="game-hub-title">Sequência de Cores</span>
+          <span class="game-hub-desc">1 a 2 moedas por acerto</span>
+        </button>
+        <button class="game-hub-item" onclick="abrirJogoCarro()">
+          <span class="game-hub-icon">🚗</span>
+          <span class="game-hub-title">Passeio na Montanha</span>
+          <span class="game-hub-desc">Dirija pelas colinas e colete moedas</span>
+        </button>
+      </div>
+      <button class="btn-primary" onclick="fecharOverlays()" style="margin-top:24px;">Voltar</button>
+    </div>
+  </div>
+
+  <!-- OVERLAY: JOGO DA VELHA -->
+  <div class="pet-overlay" id="overlayJogoVelha">
+    <div class="overlay-content">
+      <h2 class="overlay-title">⭕ Jogo da Velha</h2>
+      <p class="ttt-status" id="tttStatus">Sua vez! (Você é o 💙)</p>
+      <div class="ttt-grid" id="tttGrid"></div>
+      <button class="btn-primary" onclick="fecharJogoVelha()">Sair</button>
+      <p style="margin-top:12px; color:var(--texto-suave); font-size:0.82rem;">Vitória: +10 · Empate: +3 · Derrota: +2</p>
+    </div>
+  </div>
+
+  <!-- OVERLAY: SEQUÊNCIA DE CORES -->
+  <div class="pet-overlay" id="overlayJogoCores">
+    <div class="overlay-content">
+      <h2 class="overlay-title">🌈 Sequência de Cores</h2>
+      <div class="color-game-layout">
+        <div class="color-status-bar">
+          <div class="color-status-item">🎯 Nível: <strong id="colorLevel">0</strong></div>
+          <div class="color-status-item">🪙 Moedas: <strong id="colorCoinsEarned">0</strong></div>
+          <div class="color-status-item">🏅 Recorde: <strong id="colorBest">0</strong></div>
+        </div>
+        <p class="color-feedback" id="colorFeedback">Clique em "Começar" para iniciar</p>
+        <div class="color-grid" id="colorGrid">
+          <div class="color-pad" data-color="0">🐰</div>
+          <div class="color-pad" data-color="1">🐸</div>
+          <div class="color-pad" data-color="2">🐧</div>
+          <div class="color-pad" data-color="3">🦊</div>
+        </div>
+        <button class="btn-primary color-start-btn" id="colorStartBtn">▶️ Começar</button>
+        <p style="color:var(--texto-suave); font-size:0.8rem; font-style:italic;">A cada acerto você ganha 1 moeda. A partir do nível 5, ganha 2 moedas.</p>
+        <button class="btn-small" onclick="fecharJogoCores()">Sair</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- OVERLAY: JOGO DO CARRO (3D / POU STYLE) -->
+  <div class="pet-overlay" id="overlayJogoCarro">
+    <div class="overlay-content wide" style="padding: 16px; background: transparent; border: none; box-shadow: none;">
+      
+      <div class="car-game-wrapper" id="carGameWrapper">
+        <!-- HUD Superior -->
+        <div class="car-hud-new">
+          <div class="car-hud-text">
+            <span>Pontos: <strong id="carDistance">0</strong></span>
+            <div class="coins">🪙 <span id="carCoins">0</span></div>
+          </div>
+          <div class="car-hud-buttons">
+            <button class="hud-btn" onclick="fecharJogoCarro()" title="Sair">⏸️</button>
+          </div>
+        </div>
+
+        <!-- Cenário 3D -->
+        <div class="car-sky">
+          <div class="car-sun"></div>
+          <!-- Nuvens com sombra -->
+          <svg class="car-cloud-svg" id="carCloud1" viewBox="0 0 100 40">
+            <path d="M20,40 Q10,40 10,30 Q10,20 20,20 Q25,10 40,10 Q55,10 60,20 Q75,20 75,30 Q75,40 65,40 Z" fill="#fff" stroke="#000" stroke-width="2"/>
+          </svg>
+          <svg class="car-cloud-svg" id="carCloud2" viewBox="0 0 100 40" style="top: 30%; left: 20%; transform: scale(0.6);">
+            <path d="M20,40 Q10,40 10,30 Q10,20 20,20 Q25,10 40,10 Q55,10 60,20 Q75,20 75,30 Q75,40 65,40 Z" fill="#fff" stroke="#000" stroke-width="2"/>
+          </svg>
+        </div>
+
+        <!-- SVG do terreno com camadas e gradientes para dar volume -->
+        <svg class="car-terrain-svg" id="carTerrainSvg" preserveAspectRatio="none" viewBox="0 0 800 300">
+          <defs>
+            <!-- Gradiente para a montanha de trás -->
+            <linearGradient id="gradBack" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="#7cd45a" />
+              <stop offset="100%" stop-color="#4a992b" />
+            </linearGradient>
+            <!-- Gradiente para a montanha da frente -->
+            <linearGradient id="gradFront" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="#3d8f26" />
+              <stop offset="100%" stop-color="#1f5c10" />
+            </linearGradient>
+            <!-- Sombra projetada do carro -->
+            <radialGradient id="carShadowGrad" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="rgba(0,0,0,0.6)" />
+              <stop offset="100%" stop-color="rgba(0,0,0,0)" />
+            </radialGradient>
+          </defs>
+          
+          <path id="hillBack" fill="url(#gradBack)" d="M0,300 L0,200 Q100,100 200,200 T400,200 T600,200 T800,200 L800,300 Z" />
+          <path id="hillFront" fill="url(#gradFront)" d="M0,300 L0,200 Q100,100 200,200 T400,200 T600,200 T800,200 L800,300 Z" />
+        </svg>
+
+        <!-- O Carro 3D -->
+        <div class="car-vehicle-new" id="carVehicleNew">
+          <!-- Sombra no chão -->
+          <div class="car-shadow"></div>
+          <!-- Fumaça de aceleração -->
+          <div class="car-dust"></div>
+          
+          <!-- Estrutura do Carro com perspectiva -->
+          <div class="car-body">
+            <div class="car-cabin">
+              <div class="car-window"></div>
+            </div>
+            <div class="car-wheel front"></div>
+            <div class="car-wheel back"></div>
+          </div>
+          
+          <!-- Personagens (Passageiros) -->
+          <div class="car-char driver">👦</div>
+          <div class="car-char passenger">🐶</div>
+        </div>
+
+        <!-- Instruções visuais -->
+        <div class="car-instructions">
+          <div class="car-inst-btn brake-btn">🛑 Frear</div>
+          <div class="car-inst-btn gas-btn">⚡ Acelerar</div>
+        </div>
+      </div>
+
+      <!-- Botão Sair extra para telas maiores -->
+      <div style="text-align:center; margin-top: 16px;">
+        <button class="btn-small" onclick="fecharJogoCarro()">Sair do Jogo</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="petToast" class="pet-toast"></div>
+
   <div id="photoModal" class="modal">
     <button class="modal-close" id="modalClose">×</button>
     <img id="modalImage" src="" alt="">
   </div>
 
-  <!-- SCRIPT -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
-    import { getDatabase, ref, push, query, orderByChild, limitToLast, onValue } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyDK5NptqXlsVg07eNs6nrSRq6cI67lNofA",
-      authDomain: "nosso-mundo-62dd2.firebaseapp.com",
-      databaseURL: "https://nosso-mundo-62dd2-default-rtdb.firebaseio.com",
-      projectId: "nosso-mundo-62dd2",
-      storageBucket: "nosso-mundo-62dd2.firebasestorage.app",
-      messagingSenderId: "978695718076",
-      appId: "1:978695718076:web:b48a833b5aaf374d2cfcb9"
-    };
-
-    const IMGBB_API_KEY = "28413a1b1873f6d2d6bb500849ccb23a";
-
-    const app = initializeApp(firebaseConfig);
-    const database = getDatabase(app);
-
-    // ============================================
-    // USUÁRIOS
-    // ============================================
-    const USERS = {
-      ana: {
-        id: 'ana',
-        nomeReal: 'Ana Beatriz',
-        nomeExibicao: 'Linda',
-        emoji: '💙',
-        eu: 'Eu',
-        slotDePost: 'minhas'
-      },
-      joao: {
-        id: 'joao',
-        nomeReal: 'João Vitor',
-        nomeExibicao: 'Benzin',
-        emoji: '💜',
-        eu: 'Eu',
-        slotDePost: 'dele'
-      }
-    };
-
-    let usuarioAtual = null;
-    let galeria = { minhas: [], dele: [] };
-    let notasMural = [];
-
-    // ============================================
-    // ESCOLHA DE USUÁRIO
-    // ============================================
-    function carregarUsuarioSalvo() {
-      const salvo = localStorage.getItem('nossoCantinhoUsuario');
-      if (salvo && USERS[salvo]) {
-        usuarioAtual = USERS[salvo];
-        return true;
-      }
-      return false;
-    }
-
-    function salvarUsuario(id) {
-      localStorage.setItem('nossoCantinhoUsuario', id);
-      usuarioAtual = USERS[id];
-    }
-
-    function limparUsuario() {
-      localStorage.removeItem('nossoCantinhoUsuario');
-      usuarioAtual = null;
-    }
-
-    function getOutroUsuario() {
-      return usuarioAtual.id === 'ana' ? USERS.joao : USERS.ana;
-    }
-
-    document.querySelectorAll('.user-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        salvarUsuario(btn.dataset.user);
-        aplicarUsuarioNaUI();
-        showScreen('welcomeScreen');
-        carregarTelaDeEntrada();
-      });
-    });
-
-    document.getElementById('switchUserBtn').addEventListener('click', () => {
-      if (confirm('Trocar de usuário? Você volta para a tela de escolha.')) {
-        limparUsuario();
-        showScreen('userChoiceScreen');
-        document.getElementById('switchUserBtn').classList.remove('visible');
-      }
-    });
-
-    // ============================================
-    // APLICAR USUÁRIO NA UI
-    // ============================================
-    function aplicarUsuarioNaUI() {
-      if (!usuarioAtual) return;
-
-      const outro = getOutroUsuario();
-
-      // Saudação neutra
-      document.getElementById('personalWelcome').textContent =
-        `Que bom te ver por aqui ${usuarioAtual.emoji}`;
-
-      // Quadrado 1 (eu mesmo)
-      document.getElementById('squareMineIcon').textContent = usuarioAtual.emoji;
-      document.getElementById('squareMineTitle').textContent = `${usuarioAtual.eu} ${usuarioAtual.emoji}`;
-      document.getElementById('squareMineDesc').textContent = 'Minhas fotos';
-
-      // Quadrado 2 (o outro)
-      document.getElementById('squareOtherIcon').textContent = outro.emoji;
-      document.getElementById('squareOtherTitle').textContent = `${outro.nomeExibicao} ${outro.emoji}`;
-      document.getElementById('squareOtherDesc').textContent = 'Fotos dele';
-
-      // Badge do autor
-      document.getElementById('photoAuthorBadge').textContent =
-        `${usuarioAtual.emoji} ${usuarioAtual.eu}`;
-      document.getElementById('noteAuthorBadge').textContent =
-        `${usuarioAtual.emoji} ${usuarioAtual.eu}`;
-
-      document.getElementById('switchUserBtn').classList.add('visible');
-    }
-
-    // ============================================
-    // CANTADAS
-    // ============================================
-    const cantadas = [
-      "Você não é wifi, mas só de te ver eu já me conecto. 💙",
-      "Se beleza fosse crime, você pegava prisão perpétua. E eu visitava todos os dias. 💜",
-      "Você tem um mapa? Porque eu me perdi nos seus olhos. 👀",
-      "Não sou fotógrafo, mas consigo imaginar a gente junto pra sempre. 📸",
-      "Você acredita em amor à primeira vista, ou preciso passar de novo? 💘",
-      "Se eu pudesse te dar uma coisa, te daria meus olhos, pra você ver o quanto é especial pra mim. ✨",
-      "Você é a razão pela qual eu acredito que coisas boas acontecem com pessoas boas. 🌟",
-      "Se cada vez que eu pensasse em você nascesse uma flor, o mundo seria um jardim. 🌷",
-      "Você não é o sol, mas ilumina o meu dia inteiro. ☀️",
-      "De todos os lugares que eu já fui, nenhum é tão bom quanto do seu lado. 🏡",
-      "Meu lugar preferido no mundo é dentro do seu abraço. 🤗",
-      "Você não é perfeito, e é exatamente por isso que eu te amo tanto. 💜",
-      "O meu coração bate mais forte só de lembrar que você existe. 💓",
-      "Não precisa de filtro, você já é a melhor versão de tudo. 📷",
-      "Se eu tivesse que escolher entre você e o mundo inteiro, eu escolheria você. Sem pensar. 💙",
-      "Você é a minha música favorita, aquela que eu escuto no repeat. 🎵",
-      "Cada dia com você é um capítulo novo do meu livro favorito. 📖",
-      "Você é a resposta de uma oração que eu nem sabia que tinha feito. 🙏",
-      "Se amor fosse tempo, eu viveria pra sempre contigo. ⏳",
-      "Você é meu lugar seguro, meu porto, meu lar. 💜"
-    ];
-
-    const mensagens = {
-      madrugada: [
-        { titulo: "Boa madrugada 🌙", texto: "Os teus olhos viram o meu embrião; todos os dias determinados para mim foram escritos no teu livro antes de qualquer deles existir. — Salmos 139:16" },
-        { titulo: "Silêncio da noite ✨", texto: "Mesmo quando tudo parece escuro, lembre-se: a lua também brilha no escuro. Você é luz, mesmo quando não percebe." },
-        { titulo: "Descanso 🌌", texto: "Vinde a mim, todos os que estais cansados e sobrecarregados, e eu vos aliviarei. — Mateus 11:28" },
-        { titulo: "Noite serena 🌙", texto: "Entrego a ti meus pensamentos, meus medos e meus sonhos. Que a paz que excede todo entendimento guarde o teu coração." },
-        { titulo: "Guarda noturna ⭐", texto: "Ele não dorme nem cochila, aquele que guarda Israel. O Senhor é quem te guarda. — Salmos 121:4-5" }
-      ],
-      manha: [
-        { titulo: "Bom dia ☀️", texto: "As misericórdias do Senhor são a causa de não sermos consumidos, porque as suas misericórdias não têm fim; renovam-se cada manhã. — Lamentações 3:22-23" },
-        { titulo: "Novo começo 🌱", texto: "Hoje é uma página em branco. Escreva nela algo que te faça sorrir daqui a um ano." },
-        { titulo: "Força pra hoje 💪", texto: "Posso todas as coisas naquele que me fortalece. — Filipenses 4:13" },
-        { titulo: "Luz da manhã 🌅", texto: "A alegria do Senhor é a vossa força. — Neemias 8:10" },
-        { titulo: "Respira e vai 💙", texto: "Não precisa ser perfeito hoje. Só precisa ser seu. Um passo de cada vez também é progresso." },
-        { titulo: "Confiança 🌤️", texto: "Entrega o teu caminho ao Senhor; confia nele, e ele o fará. — Salmos 37:5" },
-        { titulo: "Gratidão 🌸", texto: "Bom dia! Que hoje você enxergue beleza até nas pequenas coisas. A vida é feita de detalhes." },
-        { titulo: "Coragem 🦋", texto: "Sê forte e corajoso; não temas, nem te espantes, porque o Senhor teu Deus é contigo por onde quer que andares. — Josué 1:9" }
-      ],
-      tarde: [
-        { titulo: "Boa tarde 🌻", texto: "Tudo tem o seu tempo determinado, e há tempo para todo propósito debaixo do céu. — Eclesiastes 3:1" },
-        { titulo: "Pausa consciente ☕", texto: "Respire. Você já fez muito até aqui. Permita-se descansar um instante sem culpa." },
-        { titulo: "Perseverança 🍃", texto: "E não nos cansemos de fazer o bem, porque a seu tempo ceifaremos, se não houvermos desfalecido. — Gálatas 6:9" },
-        { titulo: "Luz da tarde ☀️", texto: "Ainda que eu ande pelo vale da sombra da morte, não temerei mal algum, porque tu estás comigo. — Salmos 23:4" },
-        { titulo: "Um lembrete 💜", texto: "Você não precisa ter tudo resolvido hoje. Deus está trabalhando mesmo quando você não vê." },
-        { titulo: "Esperança 🌷", texto: "Porque eu bem sei os pensamentos que tenho a vosso respeito, diz o Senhor; pensamentos de paz, e não de mal, para vos dar o fim que esperais. — Jeremias 29:11" },
-        { titulo: "Continue 🌼", texto: "Boa tarde! Não desista agora. Às vezes a bênção está logo depois da curva." }
-      ],
-      noite: [
-        { titulo: "Boa noite 🌙", texto: "Em paz me deitarei e dormirei, porque só tu, Senhor, me fazes habitar em segurança. — Salmos 4:8" },
-        { titulo: "Fim de dia 🌆", texto: "Que a noite te envolva em calma e que os teus sonhos sejam doces como o teu sorriso." },
-        { titulo: "Gratidão noturna ✨", texto: "O Senhor te abençoe e te guarde; o Senhor faça resplandecer o seu rosto sobre ti e tenha misericórdia de ti. — Números 6:24-25" },
-        { titulo: "Descanso merecido 💜", texto: "Você fez o que pôde hoje. E isso já é suficiente. Descanse, amanhã é um novo recomeço." },
-        { titulo: "Entrega 🌌", texto: "Lança o teu cuidado sobre o Senhor, e ele te susterá. — Salmos 55:22" },
-        { titulo: "Boa noite 💫", texto: "Onde quer que você esteja, saiba que é amado, é visto e é importante. Boa noite!" },
-        { titulo: "Sonhos ⭐", texto: "Quando deitar, não pense nos problemas. Pense em tudo que ainda pode dar certo. Boa noite!" }
-      ]
-    };
-
-    function getPeriodoDoDia(hora) {
-      if (hora >= 0 && hora < 6) return 'madrugada';
-      if (hora >= 6 && hora < 12) return 'manha';
-      if (hora >= 12 && hora < 18) return 'tarde';
-      return 'noite';
-    }
-
-    function getSaudacao(hora) {
-      if (hora >= 0 && hora < 6) return 'Boa madrugada 🌙';
-      if (hora >= 6 && hora < 12) return 'Bom dia ☀️';
-      if (hora >= 12 && hora < 18) return 'Boa tarde 🌻';
-      return 'Boa noite 🌙';
-    }
-
-    function carregarTelaDeEntrada() {
-      const agora = new Date();
-      const hora = agora.getHours();
-      const periodo = getPeriodoDoDia(hora);
-      const lista = mensagens[periodo];
-      const escolhida = lista[Math.floor(Math.random() * lista.length)];
-
-      document.getElementById('greetingTime').textContent = getSaudacao(hora);
-      document.getElementById('welcomeTitle').textContent = escolhida.titulo;
-    }
-
-    function revelarFrase() {
-      const agora = new Date();
-      const periodo = getPeriodoDoDia(agora.getHours());
-      const ehCantada = Math.random() < 0.5;
-      let texto, badge;
-
-      if (ehCantada) {
-        texto = cantadas[Math.floor(Math.random() * cantadas.length)];
-        badge = '💌 Cantada especial';
-      } else {
-        const lista = mensagens[periodo];
-        const escolhida = lista[Math.floor(Math.random() * lista.length)];
-        texto = escolhida.texto;
-        badge = '🌷 Frase do momento';
-      }
-
-      const reveal = document.getElementById('phraseReveal');
-      reveal.style.opacity = 0;
-      setTimeout(() => {
-        reveal.textContent = texto;
-        reveal.style.opacity = 1;
-      }, 200);
-
-      document.getElementById('phraseBadge').textContent = badge;
-      document.getElementById('revealPhraseBtn').textContent = 'Ver outra 🌿';
-      document.getElementById('enterButton').style.display = 'inline-block';
-    }
-
-    document.getElementById('revealPhraseBtn').addEventListener('click', revelarFrase);
-
-    document.getElementById('enterButton').addEventListener('click', () => {
-      showScreen('worldScreen');
-    });
-
-    function showScreen(id) {
-      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-      document.getElementById(id).classList.add('active');
-      window.scrollTo(0, 0);
-    }
-
-    document.querySelectorAll('[data-back]').forEach(btn => {
-      btn.addEventListener('click', () => showScreen('worldScreen'));
-    });
-
-    // ============================================
-    // CARROSSEL
-    // ============================================
-    let carrosselIndex = 0;
-    let carrosselTimer = null;
-
-    function juntarFotosDoDia() {
-      return [...(galeria.minhas || []), ...(galeria.dele || [])];
-    }
-
-    function iniciarCarrossel() {
-      const carrossel = document.getElementById('carousel');
-      const dotsContainer = document.getElementById('carouselDots');
-      const fotos = juntarFotosDoDia();
-
-      carrossel.innerHTML = '';
-      dotsContainer.innerHTML = '';
-      if (carrosselTimer) clearInterval(carrosselTimer);
-
-      if (fotos.length === 0) {
-        carrossel.innerHTML = `
-          <div class="carousel-empty">
-            <span>📷</span>
-            <p>Ainda não há fotos do dia.</p>
-            <p style="font-size:0.8rem;">Adicione uma foto abaixo 💜</p>
-          </div>
-        `;
-        return;
-      }
-
-      fotos.forEach((foto, i) => {
-        const slide = document.createElement('div');
-        slide.className = 'carousel-slide' + (i === 0 ? ' active' : '');
-        slide.innerHTML = `
-          <img src="${foto.url}" alt="${foto.legenda || ''}" loading="lazy">
-          ${foto.legenda ? `<div class="carousel-caption">${foto.legenda}</div>` : ''}
-        `;
-        carrossel.appendChild(slide);
-
-        const dot = document.createElement('div');
-        dot.className = 'dot' + (i === 0 ? ' active' : '');
-        dotsContainer.appendChild(dot);
-      });
-
-      carrosselIndex = 0;
-      carrosselTimer = setInterval(() => {
-        const slides = carrossel.querySelectorAll('.carousel-slide');
-        const dots = dotsContainer.querySelectorAll('.dot');
-        slides[carrosselIndex].classList.remove('active');
-        dots[carrosselIndex].classList.remove('active');
-        carrosselIndex = (carrosselIndex + 1) % slides.length;
-        slides[carrosselIndex].classList.add('active');
-        dots[carrosselIndex].classList.add('active');
-      }, 4000);
-    }
-
-    // ============================================
-    // QUADRADOS
-    // ============================================
-    document.querySelectorAll('.photo-square').forEach(sq => {
-      sq.addEventListener('click', () => {
-        if (!usuarioAtual) return;
-        const tipo = sq.dataset.gallery;
-        const outro = getOutroUsuario();
-
-        const slot = tipo === 'mine' ? usuarioAtual.slotDePost : outro.slotDePost;
-        const titulo = tipo === 'mine'
-          ? `${usuarioAtual.eu} ${usuarioAtual.emoji}`
-          : `${outro.nomeExibicao} ${outro.emoji}`;
-
-        renderGallery(slot);
-        document.getElementById('galleryTitle').textContent = titulo;
-        showScreen('galleryScreen');
-      });
-    });
-
-    function renderGallery(slot) {
-      const grid = document.getElementById('galleryGrid');
-      grid.innerHTML = '';
-      const fotos = galeria[slot] || [];
-
-      if (fotos.length === 0) {
-        grid.innerHTML = `
-          <div class="empty-gallery">
-            <span>🖼️</span>
-            <p>Ainda não há fotos aqui.</p>
-            <p style="margin-top:8px;font-size:0.85rem;">Adicione uma foto no Nosso Mundo 💜</p>
-          </div>
-        `;
-        return;
-      }
-
-      fotos.forEach(foto => {
-        const card = document.createElement('div');
-        card.className = 'photo-card';
-        card.innerHTML = `
-          <img src="${foto.url}" alt="${foto.legenda || ''}" loading="lazy">
-          ${foto.legenda ? `<div class="photo-caption">${foto.legenda}</div>` : ''}
-        `;
-        card.addEventListener('click', () => openModal(foto.url));
-        grid.appendChild(card);
-      });
-    }
-
-    function openModal(url) {
-      document.getElementById('modalImage').src = url;
-      document.getElementById('photoModal').classList.add('active');
-    }
-
-    document.getElementById('modalClose').addEventListener('click', () => {
-      document.getElementById('photoModal').classList.remove('active');
-    });
-
-    document.getElementById('photoModal').addEventListener('click', (e) => {
-      if (e.target.id === 'photoModal') {
-        e.currentTarget.classList.remove('active');
-      }
-    });
-
-    // ============================================
-    // UPLOAD DE FOTOS (SEMPRE no slot do usuário atual)
-    // ============================================
-    document.getElementById('uploadPhotoBtn').addEventListener('click', () => {
-      if (!usuarioAtual) return;
-      document.getElementById('photoInput').click();
-    });
-
-    document.getElementById('photoInput').addEventListener('change', async (event) => {
-      const arquivo = event.target.files[0];
-      if (!arquivo || !usuarioAtual) return;
-
-      const btn = document.getElementById('uploadPhotoBtn');
-      const textoOriginal = btn.textContent;
-      btn.textContent = '⏳ Enviando...';
-      btn.disabled = true;
-
-      try {
-        const base64 = await new Promise((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = () => resolve(reader.result.split(',')[1]);
-          reader.onerror = reject;
-          reader.readAsDataURL(arquivo);
-        });
-
-        const formData = new FormData();
-        formData.append('key', IMGBB_API_KEY);
-        formData.append('image', base64);
-
-        const resposta = await fetch('https://api.imgbb.com/1/upload', {
-          method: 'POST',
-          body: formData
-        });
-
-        if (!resposta.ok) throw new Error(`Erro no upload: ${resposta.status}`);
-
-        const dados = await resposta.json();
-        if (!dados.success || !dados.data || !dados.data.url) {
-          throw new Error('ImgBB não retornou o link da imagem.');
-        }
-
-        const urlFoto = dados.data.url;
-        const legenda = document.getElementById('photoCaption').value.trim();
-
-        // 🔒 SEMPRE no slot do usuário atual
-        await push(ref(database, 'fotos'), {
-          url: urlFoto,
-          legenda: legenda,
-          alvo: usuarioAtual.slotDePost,
-          autor: usuarioAtual.id,
-          timestamp: Date.now()
-        });
-
-        document.getElementById('photoCaption').value = '';
-        btn.textContent = '✅ Foto adicionada!';
-
-        setTimeout(() => {
-          btn.textContent = textoOriginal;
-          btn.disabled = false;
-        }, 2000);
-
-      } catch (erro) {
-        console.error('Erro ao enviar foto:', erro);
-        alert('Não foi possível enviar a foto. Tente novamente.\n\nDetalhe: ' + erro.message);
-        btn.textContent = textoOriginal;
-        btn.disabled = false;
-      } finally {
-        event.target.value = '';
-      }
-    });
-
-    document.querySelectorAll('.game-card').forEach(card => {
-      card.addEventListener('click', () => {
-        if (card.dataset.game === 'ranking') showScreen('rankingScreen');
-      });
-    });
-
-    function novaFraseAleatoria() {
-      const agora = new Date();
-      const periodo = getPeriodoDoDia(agora.getHours());
-      const lista = mensagens[periodo];
-      const escolhida = lista[Math.floor(Math.random() * lista.length)];
-      document.getElementById('phraseText').textContent = escolhida.texto;
-      document.getElementById('phraseAuthor').textContent = escolhida.titulo;
-    }
-
-    document.getElementById('newPhraseBtn').addEventListener('click', novaFraseAleatoria);
-    novaFraseAleatoria();
-
-    // ============================================
-    // MURAL (notas SEMPRE no slot do usuário atual)
-    // ============================================
-    document.getElementById('addNoteBtn').addEventListener('click', () => {
-      if (!usuarioAtual) return;
-      const texto = document.getElementById('noteText').value.trim();
-
-      if (!texto) {
-        alert('Escreva uma mensagem 💜');
-        return;
-      }
-
-      // 🔒 SEMPRE no slot do usuário atual
-      push(ref(database, 'mural'), {
-        autor: usuarioAtual.id,
-        texto,
-        alvo: usuarioAtual.slotDePost,
-        timestamp: Date.now()
-      }).then(() => {
-        document.getElementById('noteText').value = '';
-      });
-    });
-
-    function carregarMural() {
-      const muralQuery = query(
-        ref(database, 'mural'),
-        orderByChild('timestamp'),
-        limitToLast(50)
-      );
-
-      onValue(muralQuery, (snapshot) => {
-        notasMural = [];
-        snapshot.forEach(child => notasMural.push({ id: child.key, ...child.val() }));
-        notasMural.sort((a, b) => b.timestamp - a.timestamp);
-        renderMural();
-      });
-    }
-
-    function traduzirAutor(idAutor) {
-      if (!usuarioAtual || !idAutor) return { nome: '?', emoji: '💙' };
-      if (idAutor === usuarioAtual.id) {
-        return { nome: usuarioAtual.eu, emoji: usuarioAtual.emoji };
-      }
-      const autor = USERS[idAutor];
-      if (!autor) return { nome: '?', emoji: '💙' };
-      return { nome: autor.nomeExibicao, emoji: autor.emoji };
-    }
-
-    function getUltimaNota(slot) { return notasMural.find(n => n.alvo === slot); }
-    function getUltimaFoto(slot) {
-      const lista = galeria[slot] || [];
-      return lista.length > 0 ? lista[lista.length - 1] : null;
-    }
-
-    function renderMural() {
-      if (!usuarioAtual) return;
-
-      const grid = document.getElementById('muralGrid');
-      grid.innerHTML = '';
-
-      const outro = getOutroUsuario();
-
-      const quadros = [
-        {
-          slot: usuarioAtual.slotDePost,
-          titulo: `${usuarioAtual.eu} ${usuarioAtual.emoji}`
-        },
-        {
-          slot: outro.slotDePost,
-          titulo: `${outro.nomeExibicao} ${outro.emoji}`
-        }
-      ];
-
-      quadros.forEach(quadro => {
-        const foto = getUltimaFoto(quadro.slot);
-        const nota = getUltimaNota(quadro.slot);
-        const card = document.createElement('div');
-        card.className = 'mural-card';
-
-        const fotoHtml = foto
-          ? `<div class="mural-photo" data-url="${foto.url}">
-               <img src="${foto.url}" alt="${foto.legenda || ''}" loading="lazy">
-             </div>`
-          : `<div class="mural-photo">
-               <div class="mural-photo-empty"><span>📷</span><p>Ainda sem fotos</p></div>
-             </div>`;
-
-        let notaHtml;
-        if (nota) {
-          const dataFormatada = new Date(nota.timestamp).toLocaleString('pt-BR', {
-            day: '2-digit', month: '2-digit', year: 'numeric',
-            hour: '2-digit', minute: '2-digit'
-          });
-          const info = traduzirAutor(nota.autor);
-          notaHtml = `
-            <div class="mural-note">
-              <div class="mural-note-badge">${quadro.titulo}</div>
-              <div class="mural-note-author">${info.emoji} ${info.nome}</div>
-              <div class="mural-note-text">${nota.texto}</div>
-              <div class="mural-note-date">${dataFormatada}</div>
-            </div>
-          `;
-        } else {
-          notaHtml = `
-            <div class="mural-note">
-              <div class="mural-note-badge">${quadro.titulo}</div>
-              <p class="mural-note-empty">Escreva a primeira nota para essa categoria 💌</p>
-            </div>
-          `;
-        }
-
-        card.innerHTML = fotoHtml + notaHtml;
-
-        const fotoEl = card.querySelector('.mural-photo[data-url]');
-        if (fotoEl) fotoEl.addEventListener('click', () => openModal(fotoEl.dataset.url));
-
-        grid.appendChild(card);
-      });
-    }
-
-    // ============================================
-    // CARREGAR FOTOS
-    // ============================================
-    function carregarFotos() {
-      const fotosQuery = query(
-        ref(database, 'fotos'),
-        orderByChild('timestamp'),
-        limitToLast(100)
-      );
-
-      onValue(fotosQuery, (snapshot) => {
-        galeria = { minhas: [], dele: [] };
-        snapshot.forEach(child => {
-          const foto = child.val();
-          if (foto.alvo && galeria[foto.alvo]) {
-            galeria[foto.alvo].push({ url: foto.url, legenda: foto.legenda || '' });
-          }
-        });
-        iniciarCarrossel();
-        renderMural();
-      });
-    }
-
-    // ============================================
-    // RANKING
-    // ============================================
-    const topScoresQuery = query(
-      ref(database, 'scores'),
-      orderByChild('score'),
-      limitToLast(10)
-    );
-
-    onValue(topScoresQuery, (snapshot) => {
-      const rankingList = document.getElementById('rankingList');
-      rankingList.innerHTML = '';
-      const scores = [];
-      snapshot.forEach(child => scores.push(child.val()));
-
-      if (scores.length === 0) {
-        rankingList.innerHTML = `
-          <div class="ranking-empty">
-            <span>🏆</span>
-            <p>O ranking ainda está vazio.</p>
-            <p style="font-size:0.85rem;margin-top:6px;">Joguem para aparecer aqui! 🎮</p>
-          </div>
-        `;
-        return;
-      }
-
-      scores.reverse().forEach((entrada, index) => {
-        const li = document.createElement('li');
-        const medalha = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `${index + 1}º`;
-        li.innerHTML = `<span>${medalha} ${entrada.name}</span><strong>${entrada.score}</strong>`;
-        rankingList.appendChild(li);
-      });
-    });
-
-    // ============================================
-    // INICIALIZAÇÃO
-    // ============================================
-    carregarFotos();
-    carregarMural();
-
-    if (carregarUsuarioSalvo()) {
-      aplicarUsuarioNaUI();
-      showScreen('welcomeScreen');
-      carregarTelaDeEntrada();
-    } else {
-      showScreen('userChoiceScreen');
-    }
-  </script>
+  <!-- Link para o arquivo JavaScript -->
+  <script type="module" src="script.js"></script>
 </body>
 </html>
