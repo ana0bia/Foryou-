@@ -15,6 +15,7 @@ const IMGBB_API_KEY = "28413a1b1873f6d2d6bb500849ccb23a";
 const app = initializeApp(firebaseConfig);
 const database = getDatabase(app);
 
+// Definição correta dos usuários com seus emojis e nomes
 const USERS = {
   ana: { id: 'ana', nomeReal: 'Ana Beatriz', nomeExibicao: 'Linda', emoji: '💙', eu: 'Eu', slotDePost: 'minhas' },
   joao: { id: 'joao', nomeReal: 'João Vitor', nomeExibicao: 'Benzin', emoji: '💜', eu: 'Eu', slotDePost: 'dele' }
@@ -82,15 +83,26 @@ document.getElementById('switchUserBtn').addEventListener('click', () => {
 function aplicarUsuarioNaUI() {
   if (!usuarioAtual) return;
   const outro = getOutroUsuario();
+  
+  // Textos de boas vindas
   document.getElementById('personalWelcome').textContent = `Que bom te ver por aqui ${usuarioAtual.emoji}`;
+
+  // QUADRADO 1 (VOCÊ)
   document.getElementById('squareMineIcon').textContent = usuarioAtual.emoji;
   document.getElementById('squareMineTitle').textContent = `${usuarioAtual.eu} ${usuarioAtual.emoji}`;
-  document.getElementById('squareMineDesc').textContent = 'Minhas fotos';
+  // O texto de descrição agora depende de quem é o usuário logado
+  document.getElementById('squareMineDesc').textContent = usuarioAtual.id === 'ana' ? 'Minhas fotos' : 'Minhas fotos';
+
+  // QUADRADO 2 (O OUTRO)
   document.getElementById('squareOtherIcon').textContent = outro.emoji;
   document.getElementById('squareOtherTitle').textContent = `${outro.nomeExibicao} ${outro.emoji}`;
-  document.getElementById('squareOtherDesc').textContent = 'Fotos dele';
+  // Corrige o texto "Fotos dele" para "Fotos dela" se o outro for a Ana
+  document.getElementById('squareOtherDesc').textContent = outro.id === 'ana' ? 'Fotos dela' : 'Fotos dele';
+
+  // BADGES DE AUTOR
   document.getElementById('photoAuthorBadge').textContent = `${usuarioAtual.emoji} ${usuarioAtual.eu}`;
   document.getElementById('noteAuthorBadge').textContent = `${usuarioAtual.emoji} ${usuarioAtual.eu}`;
+  
   document.getElementById('switchUserBtn').classList.add('visible');
   
   iniciarChat();
@@ -255,7 +267,15 @@ document.querySelectorAll('.photo-square').forEach(sq => {
     const tipo = sq.dataset.gallery;
     const outro = getOutroUsuario();
     const slot = tipo === 'mine' ? usuarioAtual.slotDePost : outro.slotDePost;
-    const titulo = tipo === 'mine' ? `${usuarioAtual.eu} ${usuarioAtual.emoji}` : `${outro.nomeExibicao} ${outro.emoji}`;
+    
+    // Lógica para o título da galeria
+    let titulo = '';
+    if (tipo === 'mine') {
+      titulo = `${usuarioAtual.eu} ${usuarioAtual.emoji}`;
+    } else {
+      titulo = `${outro.nomeExibicao} ${outro.emoji}`;
+    }
+
     renderGallery(slot);
     document.getElementById('galleryTitle').textContent = titulo;
     showScreen('galleryScreen');
@@ -408,10 +428,16 @@ function renderMural() {
   const grid = document.getElementById('muralGrid');
   grid.innerHTML = '';
   const outro = getOutroUsuario();
+  
+  // Define os títulos do mural dinamicamente
+  const tituloMine = `${usuarioAtual.eu} ${usuarioAtual.emoji}`;
+  const tituloOther = `${outro.nomeExibicao} ${outro.emoji}`;
+
   const quadros = [
-    { slot: usuarioAtual.slotDePost, titulo: `${usuarioAtual.eu} ${usuarioAtual.emoji}` },
-    { slot: outro.slotDePost, titulo: `${outro.nomeExibicao} ${outro.emoji}` }
+    { slot: usuarioAtual.slotDePost, titulo: tituloMine },
+    { slot: outro.slotDePost, titulo: tituloOther }
   ];
+  
   quadros.forEach(quadro => {
     const foto = getUltimaFoto(quadro.slot);
     const card = document.createElement('div');
