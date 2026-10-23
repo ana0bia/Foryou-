@@ -79,7 +79,7 @@ body { min-height: 100vh; background: var(--grad-bg); background-attachment: fix
 .carousel { width: 100%; height: 440px; border-radius: var(--radius-xl); overflow: hidden; position: relative; background: linear-gradient(135deg, rgba(34, 16, 64, 0.6), rgba(20, 26, 74, 0.6)); border: var(--borda-media); box-shadow: var(--sombra-media); }
 .carousel-slide { position: absolute; inset: 0; opacity: 0; transition: opacity 1.2s ease, transform 1.2s ease; transform: scale(1.05); display: flex; align-items: center; justify-content: center; }
 .carousel-slide.active { opacity: 1; transform: scale(1); }
-.carousel-slide img { width: 100%; height: 100%; object-fit: cover; }
+.carousel-slide img { width: 100%; height: 100%; object-fit: contain; background: #000; }
 .carousel-caption { position: absolute; bottom: 0; left: 0; right: 0; padding: 32px 28px 24px; background: linear-gradient(to top, rgba(13, 16, 48, 0.98) 0%, rgba(13, 16, 48, 0.6) 60%, transparent 100%); font-size: 1.05rem; font-weight: 600; color: var(--branco); letter-spacing: 0.3px; }
 .carousel-empty { display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 14px; color: var(--texto-suave); text-align: center; padding: 24px; }
 .carousel-empty span { font-size: 3.5rem; opacity: 0.6; }
@@ -113,7 +113,7 @@ body { min-height: 100vh; background: var(--grad-bg); background-attachment: fix
 .mural-card { break-inside: avoid; margin-bottom: 20px; border-radius: var(--radius-lg); overflow: hidden; background: linear-gradient(135deg, rgba(34, 16, 64, 0.5), rgba(20, 26, 74, 0.4)); border: var(--borda-media); transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1); display: flex; flex-direction: row; min-height: 240px; box-shadow: var(--sombra-suave); }
 .mural-card:hover { transform: translateY(-6px); border-color: rgba(200, 165, 238, 0.5); box-shadow: var(--sombra-glow); }
 .mural-photo { flex: 1 1 55%; position: relative; overflow: hidden; background: rgba(13, 16, 48, 0.5); cursor: pointer; }
-.mural-photo img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.7s cubic-bezier(0.2, 0.8, 0.2, 1); }
+.mural-photo img { width: 100%; height: 100%; object-fit: contain; background: #0d1030; display: block; transition: transform 0.7s cubic-bezier(0.2, 0.8, 0.2, 1); }
 .mural-card:hover .mural-photo img { transform: scale(1.08); }
 .mural-photo-empty { display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 10px; color: var(--texto-muted); font-size: 0.85rem; height: 100%; padding: 20px; text-align: center; }
 .mural-photo-empty span { font-size: 2.5rem; opacity: 0.5; }
@@ -153,7 +153,7 @@ body { min-height: 100vh; background: var(--grad-bg); background-attachment: fix
 .gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 18px; max-width: 1000px; width: 100%; }
 .photo-card { aspect-ratio: 1 / 1; border-radius: var(--radius-md); overflow: hidden; background: rgba(13, 16, 48, 0.5); border: var(--borda-media); position: relative; cursor: pointer; transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1); }
 .photo-card:hover { transform: scale(1.03) translateY(-4px); box-shadow: var(--sombra-glow); border-color: rgba(200, 165, 238, 0.5); }
-.photo-card img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.6s ease; }
+.photo-card img { width: 100%; height: 100%; object-fit: contain; background: #0d1030; display: block; transition: transform 0.6s ease; }
 .photo-card:hover img { transform: scale(1.08); }
 .photo-caption { position: absolute; bottom: 0; left: 0; right: 0; padding: 16px 14px; background: linear-gradient(to top, rgba(13, 16, 48, 0.98), transparent); font-size: 0.88rem; color: var(--branco-suave); font-weight: 500; }
 .empty-gallery { text-align: center; padding: 70px 20px; color: var(--texto-suave); grid-column: 1 / -1; }
