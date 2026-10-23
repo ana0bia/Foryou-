@@ -37,17 +37,26 @@ const colorGameState = {
   best: parseInt(localStorage.getItem('colorGameBest') || '0'), timeoutIds: []
 };
 
-// O estado do carro agora fica aqui em cima, junto com as variáveis do canvas
+// ==========================================
+// --- ESTADO DO JOGO DO CARRO (ESTILO POU) ---
+// ==========================================
 const carCanvas = document.getElementById('carCanvas');
 let ctx = null;
 let canvasWidth = 0;
 let canvasHeight = 0;
 
 const carGameState = {
-  running: false, speed: 0, distance: 0, coins: 0,
-  maxSpeed: 15, accel: 0.3, brakeDecel: 0.8, naturalDecel: 0.1,
-  tickRate: 30, intervalId: null, distanceOffset: 0, 
-  gasHeld: false, brakeHeld: false, lastCoinCheck: 0
+  running: false,
+  speed: 6,             // Velocidade base da estrada
+  distance: 0,
+  coins: 0,
+  tickRate: 30,
+  intervalId: null,
+  lastCoinCheck: 0,
+  obstacles: [],
+  lane: 1,              // 0 = Esquerda, 1 = Meio, 2 = Direita
+  carTargetX: 0,        // Posição visual (animação suave)
+  roadOffset: 0         // Animação das faixas da estrada
 };
 
 // --- SISTEMA DE USUÁRIOS E NAVEGAÇÃO ---
@@ -765,7 +774,9 @@ document.getElementById('colorStartBtn').addEventListener('click', () => {
   }
 });
 
-// --- JOGO DO CARRO 2.5D (CANVAS) ---
+// ==========================================
+// --- JOGO DO CARRO ESTILO POU (TOP-DOWN) ---
+// ==========================================
 window.abrirJogoCarro = () => {
   document.getElementById('overlayHubJogos').classList.remove('active');
   resetCarro();
@@ -780,17 +791,17 @@ window.fecharJogoCarro = () => {
 
 function resetCarro() {
   pararCarro();
-  carGameState.speed = 0;
+  carGameState.speed = 6;
   carGameState.distance = 0;
   carGameState.coins = 0;
-  carGameState.distanceOffset = 0;
-  carGameState.gasHeld = false;
-  carGameState.brakeHeld = false;
   carGameState.lastCoinCheck = 0;
+  carGameState.obstacles = [];
+  carGameState.lane = 1; 
+  carGameState.carTargetX = 0; 
+  carGameState.roadOffset = 0;
   
   atualizarHUDCarro();
 
-  // O setTimeout espera a tela aparecer para calcular o tamanho certo
   setTimeout(() => {
     if (carCanvas) {
       canvasWidth = carCanvas.clientWidth;
@@ -808,33 +819,15 @@ function atualizarHUDCarro() {
   document.getElementById('carCoins').textContent = carGameState.coins;
 }
 
-function drawHill(ctx, offset, amp, yBase, color) {
-  ctx.beginPath();
-  ctx.moveTo(0, canvasHeight);
-  let firstX = 0;
-  let firstY = yBase + Math.sin((firstX + offset) / 150) * amp;
-  ctx.lineTo(firstX, firstY);
-
-  for (let x = 0; x <= canvasWidth; x += 5) {
-    let y = yBase + Math.sin((x + offset) / 150) * amp;
-    ctx.lineTo(x, y);
-  }
-
-  ctx.lineTo(canvasWidth, canvasHeight);
-  ctx.closePath();
-  ctx.fillStyle = color;
-  ctx.fill();
-}
-
-function drawCar(ctx, x, y, angle) {
+function drawCarTopDown(ctx, x, y, angle) {
   ctx.save();
   ctx.translate(x, y);
   ctx.rotate(angle);
 
   // Sombra
-  ctx.fillStyle = 'rgba(0,0,0,0.3)';
+  ctx.fillStyle = 'rgba(0,0,0,0.4)';
   ctx.beginPath();
-  ctx.ellipse(0, 5, 45, 12, 0, 0, Math.PI * 2);
+  ctx.roundRect(-25, -40, 50, 80, 10);
   ctx.fill();
 
   // Carroceria
@@ -842,52 +835,35 @@ function drawCar(ctx, x, y, angle) {
   ctx.strokeStyle = '#000';
   ctx.lineWidth = 3;
   ctx.beginPath();
-  ctx.roundRect(-45, -25, 90, 30, [15, 20, 5, 5]);
+  ctx.roundRect(-25, -40, 50, 80, 15);
   ctx.fill();
   ctx.stroke();
 
-  // Cabine
+  // Capô e Teto
+  ctx.fillStyle = '#e0e0e0';
   ctx.beginPath();
-  ctx.roundRect(-25, -50, 55, 30, [20, 20, 0, 0]);
+  ctx.roundRect(-20, -35, 40, 20, 8);
   ctx.fill();
   ctx.stroke();
 
-  // Janela
   ctx.fillStyle = '#4fc3f7';
   ctx.beginPath();
-  ctx.roundRect(-15, -45, 35, 20, [10, 10, 0, 0]);
+  ctx.roundRect(-18, -10, 36, 25, 5); 
   ctx.fill();
   ctx.stroke();
 
-  // Personagens
-  ctx.font = '20px Arial';
-  ctx.fillText('👦', -20, -30);
-  ctx.fillText('🐶', 10, -30);
-
-  // Rodas
-  ctx.fillStyle = '#222';
+  ctx.fillStyle = '#e0e0e0';
   ctx.beginPath();
-  ctx.arc(-30, 0, 14, 0, Math.PI * 2);
-  ctx.arc(30, 0, 14, 0, Math.PI * 2);
+  ctx.roundRect(-20, 20, 40, 15, 5);
   ctx.fill();
-  ctx.strokeStyle = '#444';
-  ctx.lineWidth = 4;
   ctx.stroke();
 
-  // Aro
-  ctx.fillStyle = '#ddd';
+  // Faróis
+  ctx.fillStyle = '#ffeb3b';
   ctx.beginPath();
-  ctx.arc(-30, 0, 6, 0, Math.PI * 2);
-  ctx.arc(30, 0, 6, 0, Math.PI * 2);
+  ctx.arc(-15, -35, 5, 0, Math.PI*2);
+  ctx.arc(15, -35, 5, 0, Math.PI*2);
   ctx.fill();
-
-  // Fumaça
-  if (carGameState.gasHeld) {
-    ctx.fillStyle = 'rgba(200,200,200,0.6)';
-    ctx.beginPath();
-    ctx.arc(-50 - Math.random()*10, -10 - Math.random()*10, 8 + Math.random()*5, 0, Math.PI*2);
-    ctx.fill();
-  }
 
   ctx.restore();
 }
@@ -897,59 +873,130 @@ function desenharCenaCarro() {
   
   ctx.clearRect(0, 0, canvasWidth, canvasHeight);
 
-  const skyGrad = ctx.createLinearGradient(0, 0, 0, canvasHeight);
-  skyGrad.addColorStop(0, '#4fc3f7');
-  skyGrad.addColorStop(1, '#81d4fa');
-  ctx.fillStyle = skyGrad;
+  // Grama
+  ctx.fillStyle = '#2d6a1c';
   ctx.fillRect(0, 0, canvasWidth, canvasHeight);
 
-  // Sol
+  // Estrada
+  const roadWidth = canvasWidth * 0.6;
+  const roadStart = (canvasWidth - roadWidth) / 2;
+  
+  ctx.fillStyle = '#444';
+  ctx.fillRect(roadStart, 0, roadWidth, canvasHeight);
+  
+  // Bordas
   ctx.fillStyle = '#fff';
-  ctx.shadowColor = '#ffeb3b';
-  ctx.shadowBlur = 30;
-  ctx.beginPath();
-  ctx.arc(canvasWidth - 80, 60, 30, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.shadowBlur = 0;
+  ctx.fillRect(roadStart, 0, 8, canvasHeight);
+  ctx.fillRect(roadStart + roadWidth - 8, 0, 8, canvasHeight);
 
-  // Montanhas
-  drawHill(ctx, -carGameState.distanceOffset * 0.3, 60, canvasHeight * 0.65, '#7cd45a');
-  drawHill(ctx, -carGameState.distanceOffset, 80, canvasHeight * 0.75, '#3d8f26');
-
-  // Cálculo do carro
-  const carXPercent = 0.2; 
-  const carScreenX = canvasWidth * carXPercent; 
+  // Faixas animadas
+  ctx.fillStyle = '#ffd700';
+  const lineOffset = (carGameState.roadOffset) % 60;
   
-  const yBase = canvasHeight * 0.75;
-  const amp = 80;
-  const waveY = yBase + Math.sin((carScreenX + carGameState.distanceOffset) / 150) * amp;
-  
-  const slope = Math.cos((carScreenX + carGameState.distanceOffset) / 150) * (amp / 150);
-  const angle = Math.atan(slope);
+  for (let i = -60; i < canvasHeight + 60; i += 60) {
+    const y = i + lineOffset;
+    ctx.fillRect(roadStart + roadWidth * 0.33 - 4, y, 8, 30);
+    ctx.fillRect(roadStart + roadWidth * 0.66 - 4, y, 8, 30);
+  }
 
-  drawCar(ctx, carScreenX, waveY - 5, angle);
+  // Movimento suave do carro
+  const laneWidth = roadWidth / 3;
+  const targetX = roadStart + (carGameState.lane * laneWidth) + (laneWidth / 2);
+  
+  if (carGameState.carTargetX === 0) carGameState.carTargetX = targetX;
+  carGameState.carTargetX += (targetX - carGameState.carTargetX) * 0.2;
+
+  const carY = canvasHeight * 0.75;
+
+  // Desenha obstáculos e moedas
+  carGameState.obstacles.forEach(obs => {
+    if (obs.type === 'obstacle') {
+      ctx.fillStyle = '#ff6b6b';
+      ctx.strokeStyle = '#000';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.roundRect(obs.x - 20, obs.y - 30, 40, 60, 10);
+      ctx.fill();
+      ctx.stroke();
+      
+      ctx.fillStyle = '#333';
+      ctx.beginPath();
+      ctx.roundRect(obs.x - 12, obs.y - 10, 24, 15, 5);
+      ctx.fill();
+    } else {
+      ctx.fillStyle = '#ffd700';
+      ctx.strokeStyle = '#b8860b';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.arc(obs.x, obs.y, 12, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = '#b8860b';
+      ctx.font = 'bold 16px Arial';
+      ctx.fillText('$', obs.x - 5, obs.y + 6);
+    }
+  });
+
+  // Desenha o carro (com leve inclinação ao trocar de pista)
+  const visualAngle = (targetX - carGameState.carTargetX) * 0.005;
+  drawCarTopDown(ctx, carGameState.carTargetX, carY, visualAngle);
 }
 
 function tickCarro() {
   if (!carGameState.running) return;
 
-  if (carGameState.gasHeld) {
-    carGameState.speed = Math.min(carGameState.maxSpeed, carGameState.speed + carGameState.accel);
-  } else if (carGameState.brakeHeld) {
-    carGameState.speed = Math.max(0, carGameState.speed - carGameState.brakeDecel);
-  } else {
-    carGameState.speed = Math.max(0, carGameState.speed - carGameState.naturalDecel);
-  }
-
+  // Move a estrada e a distância
+  carGameState.roadOffset += carGameState.speed;
   carGameState.distance += carGameState.speed * 0.5;
-  carGameState.distanceOffset += carGameState.speed;
 
-  if (Math.floor(carGameState.distance / 100) > Math.floor(carGameState.lastCoinCheck / 100)) {
-    carGameState.coins++;
-    adicionarMoedas(1);
-    mostrarToast('🪙 +1 moeda!');
-    carGameState.lastCoinCheck = carGameState.distance;
+  // Gera novos itens
+  if (Math.random() < 0.03) {
+    const lane = Math.floor(Math.random() * 3);
+    const roadWidth = canvasWidth * 0.6;
+    const roadStart = (canvasWidth - roadWidth) / 2;
+    const laneWidth = roadWidth / 3;
+    const xPos = roadStart + (lane * laneWidth) + (laneWidth / 2);
+    
+    const isCoin = Math.random() < 0.3;
+    carGameState.obstacles.push({
+      x: xPos,
+      y: -100,
+      type: isCoin ? 'coin' : 'obstacle',
+      lane: lane
+    });
   }
+
+  // Move os itens para baixo
+  carGameState.obstacles.forEach(obs => {
+    obs.y += carGameState.speed * 1.5;
+  });
+
+  // Colisão
+  const carY = canvasHeight * 0.75;
+  for (let i = carGameState.obstacles.length - 1; i >= 0; i--) {
+    const obs = carGameState.obstacles[i];
+    
+    if (obs.y > canvasHeight + 100) {
+      carGameState.obstacles.splice(i, 1);
+      continue;
+    }
+
+    if (obs.lane === carGameState.lane && Math.abs(obs.y - carY) < 40) {
+      if (obs.type === 'coin') {
+        carGameState.coins++;
+        adicionarMoedas(1);
+        mostrarToast('🪙 +1 moeda!');
+        atualizarHUDCarro();
+        carGameState.obstacles.splice(i, 1);
+      } else {
+        carGameState.speed = 3;
+        mostrarToast('💥 Bateu! Cuidado!');
+        carGameState.obstacles.splice(i, 1);
+      }
+    }
+  }
+
+  if (carGameState.speed < 15) carGameState.speed += 0.005;
 
   atualizarHUDCarro();
   desenharCenaCarro();
@@ -968,33 +1015,24 @@ function pararCarro() {
 
 const carWrapper = document.getElementById('carGameWrapper');
 function handleCarInteraction(e) {
-  if (!carGameState.running && !carGameState.gasHeld && !carGameState.brakeHeld) {
-    iniciarCarro();
-  }
+  if (!carGameState.running) iniciarCarro();
+
   const rect = carWrapper.getBoundingClientRect();
   const clientX = e.touches ? e.touches[0].clientX : e.clientX;
   const x = clientX - rect.left;
-  
-  const carScreenX = rect.width * 0.2;
-  
-  if (x > carScreenX) {
-    carGameState.gasHeld = true;
-    carGameState.brakeHeld = false;
-  } else {
-    carGameState.brakeHeld = true;
-    carGameState.gasHeld = false;
-  }
-}
 
-function stopCarInteraction() {
-  carGameState.gasHeld = false;
-  carGameState.brakeHeld = false;
+  // Controles por clique nas laterais
+  if (x < rect.width / 3) {
+    if (carGameState.lane > 0) carGameState.lane--;
+  } else if (x > rect.width * 2/3) {
+    if (carGameState.lane < 2) carGameState.lane++;
+  } else {
+    carGameState.lane = 1;
+  }
 }
 
 carWrapper.addEventListener('mousedown', handleCarInteraction);
 carWrapper.addEventListener('touchstart', handleCarInteraction, { passive: false });
-window.addEventListener('mouseup', stopCarInteraction);
-window.addEventListener('touchend', stopCarInteraction);
 carWrapper.addEventListener('contextmenu', e => e.preventDefault());
 
 // --- DORMIR / REMÉDIO ---
