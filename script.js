@@ -25,7 +25,6 @@ let usuarioAtual = null;
 let galeria = { minhas: [], dele: [] };
 let notasMural = [];
 
-// Variáveis globais para os jogos
 let tttBoard = Array(9).fill(null);
 let tttActive = false;
 let petState = null;
@@ -38,10 +37,16 @@ const colorGameState = {
   best: parseInt(localStorage.getItem('colorGameBest') || '0'), timeoutIds: []
 };
 
+// O estado do carro agora fica aqui em cima, junto com as variáveis do canvas
+const carCanvas = document.getElementById('carCanvas');
+let ctx = null;
+let canvasWidth = 0;
+let canvasHeight = 0;
+
 const carGameState = {
   running: false, speed: 0, distance: 0, coins: 0,
   maxSpeed: 15, accel: 0.3, brakeDecel: 0.8, naturalDecel: 0.1,
-  tickRate: 30, intervalId: null, distanceOffset: 0, cloudOffset: 0,
+  tickRate: 30, intervalId: null, distanceOffset: 0, 
   gasHeld: false, brakeHeld: false, lastCoinCheck: 0
 };
 
@@ -760,27 +765,13 @@ document.getElementById('colorStartBtn').addEventListener('click', () => {
   }
 });
 
-// --- JOGO DO CARRO 3D (POU STYLE) ---
-function generateHillPath(offset, amplitude, yBase) {
-  let path = `M 0,300 L 0,${yBase}`;
-  for (let x = 0; x <= 800; x += 50) {
-    const waveY = yBase + Math.sin((x + offset) / 150) * amplitude;
-    if (x === 0) {
-      path = `M 0,300 L 0,${waveY}`;
-    } else {
-      const prevWaveY = yBase + Math.sin(((x - 50) + offset) / 150) * amplitude;
-      path += ` Q ${x - 25},${prevWaveY} ${x},${waveY}`;
-    }
-  }
-  path += ` L 800,300 Z`;
-  return path;
-}
-
+// --- JOGO DO CARRO 2.5D (CANVAS) ---
 window.abrirJogoCarro = () => {
   document.getElementById('overlayHubJogos').classList.remove('active');
   resetCarro();
   document.getElementById('overlayJogoCarro').classList.add('active');
 };
+
 window.fecharJogoCarro = () => {
   pararCarro();
   document.getElementById('overlayJogoCarro').classList.remove('active');
@@ -798,11 +789,18 @@ function resetCarro() {
   carGameState.lastCoinCheck = 0;
   
   atualizarHUDCarro();
-  const carEl = document.getElementById('carVehicleNew');
-  carEl.style.left = '20%';
-  carEl.classList.remove('accelerating', 'braking');
-  
-  atualizarCenarioCarro();
+
+  // O setTimeout espera a tela aparecer para calcular o tamanho certo
+  setTimeout(() => {
+    if (carCanvas) {
+      canvasWidth = carCanvas.clientWidth;
+      canvasHeight = carCanvas.clientHeight;
+      carCanvas.width = canvasWidth;
+      carCanvas.height = canvasHeight;
+      ctx = carCanvas.getContext('2d');
+      desenharCenaCarro();
+    }
+  }, 50);
 }
 
 function atualizarHUDCarro() {
@@ -810,44 +808,142 @@ function atualizarHUDCarro() {
   document.getElementById('carCoins').textContent = carGameState.coins;
 }
 
-function atualizarCenarioCarro() {
-  const hillBack = document.getElementById('hillBack');
-  const hillFront = document.getElementById('hillFront');
-  
-  if (hillBack) hillBack.setAttribute('d', generateHillPath(-carGameState.distanceOffset * 0.3, 40, 220));
-  if (hillFront) hillFront.setAttribute('d', generateHillPath(-carGameState.distanceOffset, 60, 250));
+function drawHill(ctx, offset, amp, yBase, color) {
+  ctx.beginPath();
+  ctx.moveTo(0, canvasHeight);
+  let firstX = 0;
+  let firstY = yBase + Math.sin((firstX + offset) / 150) * amp;
+  ctx.lineTo(firstX, firstY);
 
-  const cloud1 = document.getElementById('carCloud1');
-  const cloud2 = document.getElementById('carCloud2');
-  if (cloud1) cloud1.style.transform = `translateX(${-carGameState.cloudOffset % 800}px)`;
-  if (cloud2) cloud2.style.transform = `scale(0.6) translateX(${(-carGameState.cloudOffset * 0.5) % 800}px)`;
+  for (let x = 0; x <= canvasWidth; x += 5) {
+    let y = yBase + Math.sin((x + offset) / 150) * amp;
+    ctx.lineTo(x, y);
+  }
+
+  ctx.lineTo(canvasWidth, canvasHeight);
+  ctx.closePath();
+  ctx.fillStyle = color;
+  ctx.fill();
+}
+
+function drawCar(ctx, x, y, angle) {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(angle);
+
+  // Sombra
+  ctx.fillStyle = 'rgba(0,0,0,0.3)';
+  ctx.beginPath();
+  ctx.ellipse(0, 5, 45, 12, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Carroceria
+  ctx.fillStyle = '#fff';
+  ctx.strokeStyle = '#000';
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.roundRect(-45, -25, 90, 30, [15, 20, 5, 5]);
+  ctx.fill();
+  ctx.stroke();
+
+  // Cabine
+  ctx.beginPath();
+  ctx.roundRect(-25, -50, 55, 30, [20, 20, 0, 0]);
+  ctx.fill();
+  ctx.stroke();
+
+  // Janela
+  ctx.fillStyle = '#4fc3f7';
+  ctx.beginPath();
+  ctx.roundRect(-15, -45, 35, 20, [10, 10, 0, 0]);
+  ctx.fill();
+  ctx.stroke();
+
+  // Personagens
+  ctx.font = '20px Arial';
+  ctx.fillText('👦', -20, -30);
+  ctx.fillText('🐶', 10, -30);
+
+  // Rodas
+  ctx.fillStyle = '#222';
+  ctx.beginPath();
+  ctx.arc(-30, 0, 14, 0, Math.PI * 2);
+  ctx.arc(30, 0, 14, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = '#444';
+  ctx.lineWidth = 4;
+  ctx.stroke();
+
+  // Aro
+  ctx.fillStyle = '#ddd';
+  ctx.beginPath();
+  ctx.arc(-30, 0, 6, 0, Math.PI * 2);
+  ctx.arc(30, 0, 6, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Fumaça
+  if (carGameState.gasHeld) {
+    ctx.fillStyle = 'rgba(200,200,200,0.6)';
+    ctx.beginPath();
+    ctx.arc(-50 - Math.random()*10, -10 - Math.random()*10, 8 + Math.random()*5, 0, Math.PI*2);
+    ctx.fill();
+  }
+
+  ctx.restore();
+}
+
+function desenharCenaCarro() {
+  if (!ctx) return;
+  
+  ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+
+  const skyGrad = ctx.createLinearGradient(0, 0, 0, canvasHeight);
+  skyGrad.addColorStop(0, '#4fc3f7');
+  skyGrad.addColorStop(1, '#81d4fa');
+  ctx.fillStyle = skyGrad;
+  ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+
+  // Sol
+  ctx.fillStyle = '#fff';
+  ctx.shadowColor = '#ffeb3b';
+  ctx.shadowBlur = 30;
+  ctx.beginPath();
+  ctx.arc(canvasWidth - 80, 60, 30, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.shadowBlur = 0;
+
+  // Montanhas
+  drawHill(ctx, -carGameState.distanceOffset * 0.3, 60, canvasHeight * 0.65, '#7cd45a');
+  drawHill(ctx, -carGameState.distanceOffset, 80, canvasHeight * 0.75, '#3d8f26');
+
+  // Cálculo do carro
+  const carXPercent = 0.2; 
+  const carScreenX = canvasWidth * carXPercent; 
+  
+  const yBase = canvasHeight * 0.75;
+  const amp = 80;
+  const waveY = yBase + Math.sin((carScreenX + carGameState.distanceOffset) / 150) * amp;
+  
+  const slope = Math.cos((carScreenX + carGameState.distanceOffset) / 150) * (amp / 150);
+  const angle = Math.atan(slope);
+
+  drawCar(ctx, carScreenX, waveY - 5, angle);
 }
 
 function tickCarro() {
   if (!carGameState.running) return;
 
-  const carEl = document.getElementById('carVehicleNew');
-
-  // Física
   if (carGameState.gasHeld) {
     carGameState.speed = Math.min(carGameState.maxSpeed, carGameState.speed + carGameState.accel);
-    carEl.classList.add('accelerating');
-    carEl.classList.remove('braking');
   } else if (carGameState.brakeHeld) {
     carGameState.speed = Math.max(0, carGameState.speed - carGameState.brakeDecel);
-    carEl.classList.add('braking');
-    carEl.classList.remove('accelerating');
   } else {
     carGameState.speed = Math.max(0, carGameState.speed - carGameState.naturalDecel);
-    carEl.classList.remove('accelerating', 'braking');
   }
 
-  // Distância
   carGameState.distance += carGameState.speed * 0.5;
   carGameState.distanceOffset += carGameState.speed;
-  carGameState.cloudOffset += carGameState.speed * 0.2;
 
-  // Moedas a cada 100m
   if (Math.floor(carGameState.distance / 100) > Math.floor(carGameState.lastCoinCheck / 100)) {
     carGameState.coins++;
     adicionarMoedas(1);
@@ -855,29 +951,8 @@ function tickCarro() {
     carGameState.lastCoinCheck = carGameState.distance;
   }
 
-  // --- Cálculo da posição do carro nas montanhas (Física) ---
-  const carXPercent = 0.2; 
-  const viewBoxX = carXPercent * 800; // 160
-  
-  const yBase = 250;
-  const amplitude = 60;
-  const waveY = yBase + Math.sin((viewBoxX + carGameState.distanceOffset) / 150) * amplitude;
-  
-  const containerHeight = document.getElementById('carGameWrapper').clientHeight;
-  // Ajuste fino da altura para encaixar perfeitamente na montanha (o 300 é a altura do viewBox)
-  const carBottomPx = containerHeight - (waveY / 300 * containerHeight) - 15; // -15 para os pneus tocarem o chão
-
-  carEl.style.bottom = carBottomPx + 'px';
-  carEl.style.left = (carXPercent * 100) + '%';
-
-  // Inclinação (rotação)
-  const slope = Math.cos((viewBoxX + carGameState.distanceOffset) / 150) * (amplitude / 150);
-  const angle = Math.atan(slope) * (180 / Math.PI); 
-  carEl.style.transform = `rotate(${-angle}deg)`;
-
-  // Atualiza cenário (SVG background)
-  atualizarCenarioCarro();
   atualizarHUDCarro();
+  desenharCenaCarro();
 }
 
 function iniciarCarro() {
@@ -891,7 +966,6 @@ function pararCarro() {
   if (carGameState.intervalId) { clearInterval(carGameState.intervalId); carGameState.intervalId = null; }
 }
 
-// Controles do carro (Toque/Clique)
 const carWrapper = document.getElementById('carGameWrapper');
 function handleCarInteraction(e) {
   if (!carGameState.running && !carGameState.gasHeld && !carGameState.brakeHeld) {
@@ -902,12 +976,11 @@ function handleCarInteraction(e) {
   const x = clientX - rect.left;
   
   const carScreenX = rect.width * 0.2;
-  const carWidth = 110; // atualizado o tamanho do carro
-
-  if (x > carScreenX + (carWidth / 2)) {
+  
+  if (x > carScreenX) {
     carGameState.gasHeld = true;
     carGameState.brakeHeld = false;
-  } else if (x < carScreenX - (carWidth / 2)) {
+  } else {
     carGameState.brakeHeld = true;
     carGameState.gasHeld = false;
   }
@@ -916,8 +989,6 @@ function handleCarInteraction(e) {
 function stopCarInteraction() {
   carGameState.gasHeld = false;
   carGameState.brakeHeld = false;
-  const carEl = document.getElementById('carVehicleNew');
-  if(carEl) carEl.classList.remove('accelerating', 'braking');
 }
 
 carWrapper.addEventListener('mousedown', handleCarInteraction);

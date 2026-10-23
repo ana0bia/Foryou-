@@ -305,7 +305,7 @@
     </div>
   </div>
 
-  <!-- OVERLAY: JOGO DO CARRO (3D / POU STYLE) -->
+  <!-- OVERLAY: JOGO DO CARRO (CANVAS) -->
   <div class="pet-overlay" id="overlayJogoCarro">
     <div class="overlay-content wide" style="padding: 16px; background: transparent; border: none; box-shadow: none;">
       
@@ -321,62 +321,8 @@
           </div>
         </div>
 
-        <!-- Cenário 3D -->
-        <div class="car-sky">
-          <div class="car-sun"></div>
-          <!-- Nuvens com sombra -->
-          <svg class="car-cloud-svg" id="carCloud1" viewBox="0 0 100 40">
-            <path d="M20,40 Q10,40 10,30 Q10,20 20,20 Q25,10 40,10 Q55,10 60,20 Q75,20 75,30 Q75,40 65,40 Z" fill="#fff" stroke="#000" stroke-width="2"/>
-          </svg>
-          <svg class="car-cloud-svg" id="carCloud2" viewBox="0 0 100 40" style="top: 30%; left: 20%; transform: scale(0.6);">
-            <path d="M20,40 Q10,40 10,30 Q10,20 20,20 Q25,10 40,10 Q55,10 60,20 Q75,20 75,30 Q75,40 65,40 Z" fill="#fff" stroke="#000" stroke-width="2"/>
-          </svg>
-        </div>
-
-        <!-- SVG do terreno com camadas e gradientes para dar volume -->
-        <svg class="car-terrain-svg" id="carTerrainSvg" preserveAspectRatio="none" viewBox="0 0 800 300">
-          <defs>
-            <!-- Gradiente para a montanha de trás -->
-            <linearGradient id="gradBack" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stop-color="#7cd45a" />
-              <stop offset="100%" stop-color="#4a992b" />
-            </linearGradient>
-            <!-- Gradiente para a montanha da frente -->
-            <linearGradient id="gradFront" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stop-color="#3d8f26" />
-              <stop offset="100%" stop-color="#1f5c10" />
-            </linearGradient>
-            <!-- Sombra projetada do carro -->
-            <radialGradient id="carShadowGrad" cx="50%" cy="50%" r="50%">
-              <stop offset="0%" stop-color="rgba(0,0,0,0.6)" />
-              <stop offset="100%" stop-color="rgba(0,0,0,0)" />
-            </radialGradient>
-          </defs>
-          
-          <path id="hillBack" fill="url(#gradBack)" d="M0,300 L0,200 Q100,100 200,200 T400,200 T600,200 T800,200 L800,300 Z" />
-          <path id="hillFront" fill="url(#gradFront)" d="M0,300 L0,200 Q100,100 200,200 T400,200 T600,200 T800,200 L800,300 Z" />
-        </svg>
-
-        <!-- O Carro 3D -->
-        <div class="car-vehicle-new" id="carVehicleNew">
-          <!-- Sombra no chão -->
-          <div class="car-shadow"></div>
-          <!-- Fumaça de aceleração -->
-          <div class="car-dust"></div>
-          
-          <!-- Estrutura do Carro com perspectiva -->
-          <div class="car-body">
-            <div class="car-cabin">
-              <div class="car-window"></div>
-            </div>
-            <div class="car-wheel front"></div>
-            <div class="car-wheel back"></div>
-          </div>
-          
-          <!-- Personagens (Passageiros) -->
-          <div class="car-char driver">👦</div>
-          <div class="car-char passenger">🐶</div>
-        </div>
+        <!-- O Canvas onde o jogo é desenhado -->
+        <canvas id="carCanvas" style="width: 100%; height: 100%; display: block;"></canvas>
 
         <!-- Instruções visuais -->
         <div class="car-instructions">
@@ -385,7 +331,6 @@
         </div>
       </div>
 
-      <!-- Botão Sair extra para telas maiores -->
       <div style="text-align:center; margin-top: 16px;">
         <button class="btn-small" onclick="fecharJogoCarro()">Sair do Jogo</button>
       </div>
@@ -399,7 +344,6 @@
     <img id="modalImage" src="" alt="">
   </div>
 
-  <!-- Link para o arquivo JavaScript -->
   <script type="module" src="script.js"></script>
 </body>
 </html>
