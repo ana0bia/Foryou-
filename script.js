@@ -93,7 +93,6 @@ function aplicarUsuarioNaUI() {
   document.getElementById('noteAuthorBadge').textContent = `${usuarioAtual.emoji} ${usuarioAtual.eu}`;
   document.getElementById('switchUserBtn').classList.add('visible');
   
-  // Inicia o chat AGORA que sabemos quem é o usuário
   iniciarChat();
 }
 

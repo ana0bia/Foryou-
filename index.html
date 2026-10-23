@@ -4,6 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Nosso Cantinho 💜</title>
+  <!-- Favicon invisível para evitar erro 404 -->
+  <link rel="icon" href="data:,">
+  
   <link href="https://fonts.googleapis.com/css2?family=Titan+One&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
@@ -222,7 +225,7 @@
     </div>
   </section>
 
-       <!-- TELA 6: CHAT -->
+  <!-- TELA 6: CHAT -->
   <section id="chatScreen" class="screen">
     <button class="btn-back" data-back>← Voltar</button>
     
@@ -231,7 +234,6 @@
         <h1>💬 Nossas Conversas</h1>
       </div>
       
-      <!-- Opções de personalização -->
       <div class="chat-options">
         <button class="btn-small" id="btnThemeBg" style="font-size: 0.75rem; padding: 8px 12px;">🎨 Fundo</button>
         <div id="colorPickerContainer" style="display: none; position:absolute; background: #111b21; padding: 10px; border-radius: 10px; z-index: 100; border: 1px solid #2a3942;">
@@ -242,7 +244,6 @@
     </div>
     
     <div class="chat-container" id="chatContainer">
-      <!-- O fundo será aplicado via JS aqui -->
       <div class="chat-messages" id="chatMessages"></div>
       
       <div class="chat-input-area">
