@@ -12,7 +12,6 @@ const firebaseConfig = {
 };
 
 const IMGBB_API_KEY = "28413a1b1873f6d2d6bb500849ccb23a";
-
 const app = initializeApp(firebaseConfig);
 const database = getDatabase(app);
 
@@ -32,31 +31,24 @@ let listenerAtivo = false;
 let isSleeping = false;
 let sleepInterval = null;
 
+// Estado do Chat
+let chatListenerAtivo = false;
+const userChatBgKey = 'chatBg_';
+const userChatBubbleKey = 'chatBubble_';
+
 const colorGameState = {
   sequence: [], playerIndex: 0, level: 0, playing: false, accepting: false, coinsEarned: 0,
   best: parseInt(localStorage.getItem('colorGameBest') || '0'), timeoutIds: []
 };
 
-// ==========================================
-// --- ESTADO DO JOGO DO CARRO (ESTILO POU) ---
-// ==========================================
 const carCanvas = document.getElementById('carCanvas');
 let ctx = null;
 let canvasWidth = 0;
 let canvasHeight = 0;
 
 const carGameState = {
-  running: false,
-  speed: 6,             // Velocidade base da estrada
-  distance: 0,
-  coins: 0,
-  tickRate: 30,
-  intervalId: null,
-  lastCoinCheck: 0,
-  obstacles: [],
-  lane: 1,              // 0 = Esquerda, 1 = Meio, 2 = Direita
-  carTargetX: 0,        // Posição visual (animação suave)
-  roadOffset: 0         // Animação das faixas da estrada
+  running: false, speed: 6, distance: 0, coins: 0, tickRate: 30, intervalId: null,
+  lastCoinCheck: 0, obstacles: [], lane: 1, carTargetX: 0, roadOffset: 0
 };
 
 // --- SISTEMA DE USUÁRIOS E NAVEGAÇÃO ---
@@ -100,6 +92,9 @@ function aplicarUsuarioNaUI() {
   document.getElementById('photoAuthorBadge').textContent = `${usuarioAtual.emoji} ${usuarioAtual.eu}`;
   document.getElementById('noteAuthorBadge').textContent = `${usuarioAtual.emoji} ${usuarioAtual.eu}`;
   document.getElementById('switchUserBtn').classList.add('visible');
+  
+  // Inicia o chat AGORA que sabemos quem é o usuário
+  iniciarChat();
 }
 
 // --- CONTEÚDO E TELA DE ENTRADA ---
@@ -196,6 +191,14 @@ function revelarFrase() {
 
 document.getElementById('revealPhraseBtn').addEventListener('click', revelarFrase);
 document.getElementById('enterButton').addEventListener('click', () => showScreen('worldScreen'));
+
+document.getElementById('openChatBtn').addEventListener('click', () => {
+  showScreen('chatScreen');
+  setTimeout(() => {
+    const chatMessages = document.getElementById('chatMessages');
+    if (chatMessages) chatMessages.scrollTop = chatMessages.scrollHeight;
+  }, 100);
+});
 
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -319,7 +322,8 @@ document.getElementById('photoInput').addEventListener('change', async (event) =
     const legenda = document.getElementById('photoCaption').value.trim();
     await push(ref(database, 'fotos'), {
       url: urlFoto, legenda, alvo: usuarioAtual.slotDePost,
-      autor: usuarioAtual.id, timestamp: Date.now()
+      autor: usuarioAtual.id, timestamp: Date.now(),
+      notaTexto: "", notaTimestamp: 0
     });
     document.getElementById('photoCaption').value = '';
     btn.textContent = '✅ Foto adicionada!';
@@ -356,14 +360,25 @@ function novaFraseAleatoria() {
 document.getElementById('newPhraseBtn').addEventListener('click', novaFraseAleatoria);
 novaFraseAleatoria();
 
-// --- MURAL ---
-document.getElementById('addNoteBtn').addEventListener('click', () => {
+// --- MURAL (Legenda na foto) ---
+document.getElementById('addNoteBtn').addEventListener('click', async () => {
   if (!usuarioAtual) return;
   const texto = document.getElementById('noteText').value.trim();
   if (!texto) { alert('Escreva uma mensagem 💜'); return; }
-  push(ref(database, 'mural'), {
-    autor: usuarioAtual.id, texto, alvo: usuarioAtual.slotDePost, timestamp: Date.now()
-  }).then(() => { document.getElementById('noteText').value = ''; });
+
+  const lista = galeria[usuarioAtual.slotDePost] || [];
+  if (lista.length > 0) {
+    const ultimaFoto = lista[lista.length - 1];
+    await update(ref(database, 'fotos/' + ultimaFoto.id), {
+      notaTexto: texto,
+      notaTimestamp: Date.now(),
+      notaAutor: usuarioAtual.id
+    });
+    document.getElementById('noteText').value = '';
+    mostrarToast('💌 Legenda atualizada!');
+  } else {
+    mostrarToast('❌ Adicione uma foto primeiro!');
+  }
 });
 
 function carregarMural() {
@@ -384,7 +399,6 @@ function traduzirAutor(idAutor) {
   return { nome: autor.nomeExibicao, emoji: autor.emoji };
 }
 
-function getUltimaNota(slot) { return notasMural.find(n => n.alvo === slot); }
 function getUltimaFoto(slot) {
   const lista = galeria[slot] || [];
   return lista.length > 0 ? lista[lista.length - 1] : null;
@@ -401,30 +415,31 @@ function renderMural() {
   ];
   quadros.forEach(quadro => {
     const foto = getUltimaFoto(quadro.slot);
-    const nota = getUltimaNota(quadro.slot);
     const card = document.createElement('div');
     card.className = 'mural-card';
+    
     const fotoHtml = foto
       ? `<div class="mural-photo" data-url="${foto.url}"><img src="${foto.url}" alt="${foto.legenda || ''}" loading="lazy"></div>`
       : `<div class="mural-photo"><div class="mural-photo-empty"><span>📷</span><p>Ainda sem fotos</p></div></div>`;
-    let notaHtml;
-    if (nota) {
-      const dataFormatada = new Date(nota.timestamp).toLocaleString('pt-BR', {
+      
+    let notaHtml = `<div class="mural-note">
+        <div class="mural-note-badge">${quadro.titulo}</div>`;
+        
+    if (foto && foto.notaTexto) {
+       const dataFormatada = new Date(foto.notaTimestamp).toLocaleString('pt-BR', {
         day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
       });
-      const info = traduzirAutor(nota.autor);
-      notaHtml = `<div class="mural-note">
-        <div class="mural-note-badge">${quadro.titulo}</div>
+      const info = traduzirAutor(foto.notaAutor);
+      notaHtml += `
         <div class="mural-note-author">${info.emoji} ${info.nome}</div>
-        <div class="mural-note-text">${nota.texto}</div>
+        <div class="mural-note-text">${foto.notaTexto}</div>
         <div class="mural-note-date">${dataFormatada}</div>
-      </div>`;
+      `;
     } else {
-      notaHtml = `<div class="mural-note">
-        <div class="mural-note-badge">${quadro.titulo}</div>
-        <p class="mural-note-empty">Escreva a primeira nota para essa categoria 💌</p>
-      </div>`;
+      notaHtml += `<p class="mural-note-empty">Sem legenda ainda. Vá em "Conversas 💬" para mandar um chat!</p>`;
     }
+    notaHtml += `</div>`;
+    
     card.innerHTML = fotoHtml + notaHtml;
     const fotoEl = card.querySelector('.mural-photo[data-url]');
     if (fotoEl) fotoEl.addEventListener('click', () => openModal(fotoEl.dataset.url));
@@ -439,7 +454,14 @@ function carregarFotos() {
     snapshot.forEach(child => {
       const foto = child.val();
       if (foto.alvo && galeria[foto.alvo]) {
-        galeria[foto.alvo].push({ url: foto.url, legenda: foto.legenda || '' });
+        galeria[foto.alvo].push({ 
+          id: child.key, 
+          url: foto.url, 
+          legenda: foto.legenda || '',
+          notaTexto: foto.notaTexto,
+          notaTimestamp: foto.notaTimestamp,
+          notaAutor: foto.notaAutor
+        });
       }
     });
     iniciarCarrossel();
@@ -447,7 +469,205 @@ function carregarFotos() {
   });
 }
 
-// --- LÓGICA DO BICHINHO ---
+// ==========================================
+// --- CHAT E PERSONALIZAÇÃO ---
+// ==========================================
+const chatMessagesRef = ref(database, 'chat');
+const chatInput = document.getElementById('chatInput');
+const sendChatBtn = document.getElementById('sendChatBtn');
+const chatMediaBtn = document.getElementById('chatMediaBtn');
+const chatMediaInput = document.getElementById('chatMediaInput');
+const chatContainer = document.getElementById('chatContainer');
+const chatMessagesBox = document.getElementById('chatMessages');
+
+let currentBubbleColor = '#005c4b';
+
+function iniciarChat() {
+  if (chatListenerAtivo || !usuarioAtual) return;
+  chatListenerAtivo = true;
+
+  const savedBg = localStorage.getItem(userChatBgKey + usuarioAtual.id) || 'bg-pattern';
+  currentBubbleColor = localStorage.getItem(userChatBubbleKey + usuarioAtual.id) || '#005c4b';
+  
+  if (chatContainer) chatContainer.className = `chat-container ${savedBg}`;
+
+  // OUVINTE DO FIREBASE
+  onValue(query(chatMessagesRef, orderByChild('timestamp'), limitToLast(100)), (snapshot) => {
+    if (!chatMessagesBox) return;
+    
+    chatMessagesBox.innerHTML = '';
+    const msgs = [];
+    snapshot.forEach(child => msgs.push(child.val()));
+    
+    msgs.forEach(msg => {
+      const isMine = msg.autor === usuarioAtual.id;
+      const autorInfo = traduzirAutor(msg.autor);
+      
+      const bubble = document.createElement('div');
+      bubble.className = `chat-bubble ${isMine ? 'mine' : 'theirs'}`;
+      
+      const time = new Date(msg.timestamp).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+      
+      let content = '';
+      if (!isMine) {
+        content += `<div style="font-size:0.7rem; font-weight:700; margin-bottom:4px; opacity:0.8;">${autorInfo.emoji} ${autorInfo.nome}</div>`;
+      }
+      
+      if (msg.tipo === 'midia') {
+        content += `<img src="${msg.url}" alt="Mídia" onclick="openModal('${msg.url}')">`;
+      } else {
+        content += `${msg.texto}`;
+      }
+      
+      content += `<span class="chat-time">${time} ✓✓</span>`;
+      bubble.innerHTML = content;
+      
+      if (isMine) {
+        bubble.style.backgroundColor = currentBubbleColor;
+      }
+      
+      chatMessagesBox.appendChild(bubble);
+    });
+    
+    chatMessagesBox.scrollTop = chatMessagesBox.scrollHeight;
+  });
+}
+
+// Auto-resize do input
+if (chatInput) {
+  chatInput.addEventListener('input', function() {
+    this.style.height = '44px';
+    this.style.height = (this.scrollHeight) + 'px';
+  });
+
+  chatInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendChatBtn.click();
+    }
+  });
+}
+
+// Enviar texto otimizado (Não trava e limpa na hora)
+if (sendChatBtn) {
+  sendChatBtn.addEventListener('click', () => {
+    const texto = chatInput.value.trim();
+    if (!texto || !usuarioAtual) return;
+
+    chatInput.value = '';
+    chatInput.style.height = '44px';
+    
+    // Envia direto pro Firebase
+    push(chatMessagesRef, {
+      autor: usuarioAtual.id,
+      texto: texto,
+      tipo: 'texto',
+      timestamp: Date.now()
+    }).catch(err => {
+      console.error("Erro ao enviar mensagem:", err);
+      alert("Erro de conexão. Verifique as regras do Firebase.");
+    });
+  });
+}
+
+// --- TEMAS E CORES ---
+const btnThemeBg = document.getElementById('btnThemeBg');
+if (btnThemeBg) {
+  btnThemeBg.addEventListener('click', () => {
+    const bgs = ['bg-pattern', 'bg-sky', 'bg-space', 'bg-hearts'];
+    const currentClass = Array.from(chatContainer.classList).find(c => c.startsWith('bg-'));
+    let nextIndex = (bgs.indexOf(currentClass) + 1) % bgs.length;
+    
+    chatContainer.classList.remove(...bgs);
+    chatContainer.classList.add(bgs[nextIndex]);
+    
+    localStorage.setItem(userChatBgKey + usuarioAtual.id, bgs[nextIndex]);
+    mostrarToast('🎨 Fundo alterado!');
+  });
+
+  btnThemeBg.addEventListener('dblclick', (e) => {
+    e.preventDefault();
+    document.getElementById('colorPickerContainer').style.display = 'block';
+  });
+}
+
+const chatColorPicker = document.getElementById('chatColorPicker');
+if (chatColorPicker) {
+  chatColorPicker.addEventListener('input', (e) => {
+    currentBubbleColor = e.target.value;
+    localStorage.setItem(userChatBubbleKey + usuarioAtual.id, currentBubbleColor);
+    document.querySelectorAll('.chat-bubble.mine').forEach(b => b.style.backgroundColor = currentBubbleColor);
+  });
+}
+
+// --- ENVIAR GIF ---
+const btnGif = document.getElementById('btnGif');
+if (btnGif) {
+  btnGif.addEventListener('click', () => {
+    const url = prompt('Cole o link do GIF (ex: termina com .gif):');
+    if (!url || !url.startsWith('http')) return;
+
+    push(chatMessagesRef, {
+      autor: usuarioAtual.id,
+      tipo: 'midia',
+      url: url,
+      timestamp: Date.now()
+    }).then(() => {
+      mostrarToast('🖼️ GIF enviado!');
+    }).catch(err => {
+      console.error(err);
+      alert('Erro ao enviar. Verifique o link.');
+    });
+  });
+}
+
+// --- ENVIAR FOTO DA GALERIA ---
+if (chatMediaBtn) {
+  chatMediaBtn.addEventListener('click', () => chatMediaInput.click());
+
+  chatMediaInput.addEventListener('change', async (event) => {
+    const arquivo = event.target.files[0];
+    if (!arquivo || !usuarioAtual) return;
+
+    chatMediaBtn.innerHTML = '⏳';
+    chatMediaBtn.disabled = true;
+
+    try {
+      const base64 = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result.split(',')[1]);
+        reader.onerror = reject;
+        reader.readAsDataURL(arquivo);
+      });
+
+      const formData = new FormData();
+      formData.append('key', IMGBB_API_KEY);
+      formData.append('image', base64);
+
+      const resposta = await fetch('https://api.imgbb.com/1/upload', { method: 'POST', body: formData });
+      const dados = await resposta.json();
+      
+      if (dados.success) {
+        await push(chatMessagesRef, {
+          autor: usuarioAtual.id,
+          tipo: 'midia',
+          url: dados.data.url,
+          timestamp: Date.now()
+        });
+      }
+    } catch (erro) {
+      console.error(erro);
+      alert('Não foi possível enviar a mídia.');
+    } finally {
+      chatMediaBtn.innerHTML = '📎';
+      chatMediaBtn.disabled = false;
+      event.target.value = '';
+    }
+  });
+}
+
+// O resto das funções do Bichinho e do Carro continuam iguais...
+
 function getPetRef() { return ref(database, 'bichinhos/' + usuarioAtual.id); }
 
 async function carregarBichinho() {
@@ -1021,7 +1241,6 @@ function handleCarInteraction(e) {
   const clientX = e.touches ? e.touches[0].clientX : e.clientX;
   const x = clientX - rect.left;
 
-  // Controles por clique nas laterais
   if (x < rect.width / 3) {
     if (carGameState.lane > 0) carGameState.lane--;
   } else if (x > rect.width * 2/3) {
