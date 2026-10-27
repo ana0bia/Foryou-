@@ -15,7 +15,6 @@ const IMGBB_API_KEY = "28413a1b1873f6d2d6bb500849ccb23a";
 const app = initializeApp(firebaseConfig);
 const database = getDatabase(app);
 
-// Definição correta dos usuários com seus emojis e nomes
 const USERS = {
   ana: { id: 'ana', nomeReal: 'Ana Beatriz', nomeExibicao: 'Linda', emoji: '💙', eu: 'Eu', slotDePost: 'minhas' },
   joao: { id: 'joao', nomeReal: 'João Vitor', nomeExibicao: 'Benzin', emoji: '💜', eu: 'Eu', slotDePost: 'dele' }
@@ -84,25 +83,16 @@ function aplicarUsuarioNaUI() {
   if (!usuarioAtual) return;
   const outro = getOutroUsuario();
   
-  // Textos de boas vindas
   document.getElementById('personalWelcome').textContent = `Que bom te ver por aqui ${usuarioAtual.emoji}`;
-
-  // QUADRADO 1 (VOCÊ)
   document.getElementById('squareMineIcon').textContent = usuarioAtual.emoji;
   document.getElementById('squareMineTitle').textContent = `${usuarioAtual.eu} ${usuarioAtual.emoji}`;
-  // O texto de descrição agora depende de quem é o usuário logado
-  document.getElementById('squareMineDesc').textContent = usuarioAtual.id === 'ana' ? 'Minhas fotos' : 'Minhas fotos';
-
-  // QUADRADO 2 (O OUTRO)
+  document.getElementById('squareMineDesc').textContent = 'Minhas fotos';
   document.getElementById('squareOtherIcon').textContent = outro.emoji;
   document.getElementById('squareOtherTitle').textContent = `${outro.nomeExibicao} ${outro.emoji}`;
-  // Corrige o texto "Fotos dele" para "Fotos dela" se o outro for a Ana
   document.getElementById('squareOtherDesc').textContent = outro.id === 'ana' ? 'Fotos dela' : 'Fotos dele';
-
-  // BADGES DE AUTOR
+  
   document.getElementById('photoAuthorBadge').textContent = `${usuarioAtual.emoji} ${usuarioAtual.eu}`;
   document.getElementById('noteAuthorBadge').textContent = `${usuarioAtual.emoji} ${usuarioAtual.eu}`;
-  
   document.getElementById('switchUserBtn').classList.add('visible');
   
   iniciarChat();
@@ -268,7 +258,6 @@ document.querySelectorAll('.photo-square').forEach(sq => {
     const outro = getOutroUsuario();
     const slot = tipo === 'mine' ? usuarioAtual.slotDePost : outro.slotDePost;
     
-    // Lógica para o título da galeria
     let titulo = '';
     if (tipo === 'mine') {
       titulo = `${usuarioAtual.eu} ${usuarioAtual.emoji}`;
@@ -429,7 +418,6 @@ function renderMural() {
   grid.innerHTML = '';
   const outro = getOutroUsuario();
   
-  // Define os títulos do mural dinamicamente
   const tituloMine = `${usuarioAtual.eu} ${usuarioAtual.emoji}`;
   const tituloOther = `${outro.nomeExibicao} ${outro.emoji}`;
 
@@ -516,7 +504,6 @@ function iniciarChat() {
   
   if (chatContainer) chatContainer.className = `chat-container ${savedBg}`;
 
-  // OUVINTE DO FIREBASE
   onValue(query(chatMessagesRef, orderByChild('timestamp'), limitToLast(100)), (snapshot) => {
     if (!chatMessagesBox) return;
     
@@ -558,7 +545,6 @@ function iniciarChat() {
   });
 }
 
-// Auto-resize do input
 if (chatInput) {
   chatInput.addEventListener('input', function() {
     this.style.height = '44px';
@@ -573,7 +559,6 @@ if (chatInput) {
   });
 }
 
-// Enviar texto otimizado (Não trava e limpa na hora)
 if (sendChatBtn) {
   sendChatBtn.addEventListener('click', () => {
     const texto = chatInput.value.trim();
@@ -582,7 +567,6 @@ if (sendChatBtn) {
     chatInput.value = '';
     chatInput.style.height = '44px';
     
-    // Envia direto pro Firebase
     push(chatMessagesRef, {
       autor: usuarioAtual.id,
       texto: texto,
@@ -595,7 +579,6 @@ if (sendChatBtn) {
   });
 }
 
-// --- TEMAS E CORES ---
 const btnThemeBg = document.getElementById('btnThemeBg');
 if (btnThemeBg) {
   btnThemeBg.addEventListener('click', () => {
@@ -625,7 +608,6 @@ if (chatColorPicker) {
   });
 }
 
-// --- ENVIAR GIF ---
 const btnGif = document.getElementById('btnGif');
 if (btnGif) {
   btnGif.addEventListener('click', () => {
@@ -646,7 +628,6 @@ if (btnGif) {
   });
 }
 
-// --- ENVIAR FOTO DA GALERIA ---
 if (chatMediaBtn) {
   chatMediaBtn.addEventListener('click', () => chatMediaInput.click());
 
@@ -691,15 +672,14 @@ if (chatMediaBtn) {
   });
 }
 
-// O resto das funções do Bichinho e do Carro continuam iguais...
-
+// --- LÓGICA DO BICHINHO E PONTUAÇÃO ---
 function getPetRef() { return ref(database, 'bichinhos/' + usuarioAtual.id); }
 
 async function carregarBichinho() {
   if (!usuarioAtual) return;
   const snap = await get(getPetRef());
   if (!snap.exists()) {
-    const novo = { fome: 100, energia: 100, saude: 100, alegria: 100, moedas: 20, pontos: 0, lastUpdate: Date.now() };
+    const novo = { fome: 100, energia: 100, saude: 100, alegria: 100, moedas: 20, pontosCuidado: 0, pontosJogos: 0, lastUpdate: Date.now() };
     await set(getPetRef(), novo);
   } else {
     const agora = Date.now();
@@ -712,7 +692,8 @@ async function carregarBichinho() {
       saude: Math.max(0, (state.saude ?? 100) - (decay * 0.5)),
       alegria: Math.max(0, (state.alegria ?? 100) - decay),
       moedas: state.moedas ?? 20,
-      pontos: state.pontos || 0,
+      pontosCuidado: state.pontosCuidado || 0,
+      pontosJogos: state.pontosJogos || 0,
       lastUpdate: agora
     };
     await update(getPetRef(), decaido);
@@ -734,7 +715,9 @@ function renderPet() {
   document.getElementById('miniSaude').style.width = petState.saude + '%';
   document.getElementById('miniAlegria').style.width = petState.alegria + '%';
   document.getElementById('petCoins').textContent = petState.moedas || 0;
-  document.getElementById('petScoreBadge').textContent = `⭐ ${petState.pontos || 0} pts`;
+  
+  const totalPontos = (petState.pontosCuidado || 0) + (petState.pontosJogos || 0);
+  document.getElementById('petScoreBadge').textContent = `⭐ ${totalPontos} pts`;
 
   const media = (petState.fome + petState.energia + petState.saude + petState.alegria) / 4;
   let emoji = 'emoji-happy';
@@ -785,6 +768,16 @@ async function adicionarMoedas(qtd) {
   await atualizarPet({ moedas: (petState.moedas || 0) + qtd });
 }
 
+// NOVA FUNÇÃO: ADICIONAR PONTOS ESPECÍFICOS
+async function adicionarPontos(tipo, qtd) {
+  if (!petState) return;
+  if (tipo === 'jogo') {
+    await atualizarPet({ pontosJogos: (petState.pontosJogos || 0) + qtd });
+  } else if (tipo === 'cuidado') {
+    await atualizarPet({ pontosCuidado: (petState.pontosCuidado || 0) + qtd });
+  }
+}
+
 window.fecharOverlays = () => {
   document.querySelectorAll('.pet-overlay').forEach(el => el.classList.remove('active'));
   pararJogoCores();
@@ -801,11 +794,10 @@ window.comprarComida = async (nome, preco, fomeGanha, alegriaGanha) => {
   await atualizarPet({
     moedas: petState.moedas - preco,
     fome: Math.min(100, (petState.fome || 0) + fomeGanha),
-    alegria: Math.min(100, (petState.alegria || 0) + alegriaGanha),
-    pontos: (petState.pontos || 0) + 5
+    alegria: Math.min(100, (petState.alegria || 0) + alegriaGanha)
   });
+  await adicionarPontos('jogo', 5); // Mercado é pontuação de jogo (interação)
   mostrarToast(`🍽️ Nhac! +${fomeGanha} fome`);
-  registrarRanking(5, usuarioAtual.nomeReal + ' ' + usuarioAtual.emoji);
 };
 
 // --- JOGO DA VELHA ---
@@ -848,15 +840,16 @@ async function jogarTTT(index) {
     tttActive = false;
     document.getElementById('tttStatus').textContent = "Você ganhou! 🎉 +10 moedas";
     await adicionarMoedas(10);
+    await adicionarPontos('jogo', 10);
     if (petState) await atualizarPet({ alegria: Math.min(100, (petState.alegria||0) + 15) });
     mostrarToast('🏆 Vitória! +10 moedas');
-    registrarRanking(10, usuarioAtual.nomeReal + ' ' + usuarioAtual.emoji);
     return;
   }
   if (tttBoard.every(c => c)) {
     tttActive = false;
     document.getElementById('tttStatus').textContent = "Empate! 🤝 +3 moedas";
     await adicionarMoedas(3);
+    await adicionarPontos('jogo', 3);
     return;
   }
   document.getElementById('tttStatus').textContent = "Bichinho pensando... 🐰";
@@ -870,6 +863,7 @@ async function jogarTTT(index) {
         tttActive = false;
         document.getElementById('tttStatus').textContent = "O bichinho ganhou! 🐰 +2 moedas";
         await adicionarMoedas(2);
+        await adicionarPontos('jogo', 2);
         mostrarToast('🐰 Ele ganhou! +2 moedas');
         return;
       }
@@ -877,6 +871,7 @@ async function jogarTTT(index) {
         tttActive = false;
         document.getElementById('tttStatus').textContent = "Empate! 🤝 +3 moedas";
         await adicionarMoedas(3);
+        await adicionarPontos('jogo', 3);
         return;
       }
       document.getElementById('tttStatus').textContent = "Sua vez! (Você é o 💙)";
@@ -987,7 +982,6 @@ async function jogadorClicouCor(index) {
     }
     document.getElementById('colorStartBtn').textContent = '🔄 Jogar Novamente';
     document.getElementById('colorStartBtn').disabled = false;
-    registrarRanking(colorGameState.coinsEarned, usuarioAtual.nomeReal + ' ' + usuarioAtual.emoji);
     return;
   }
 
@@ -1001,6 +995,7 @@ async function jogadorClicouCor(index) {
     document.getElementById('colorFeedback').textContent = `✅ Acertou! +${moedasGanhas} moeda${moedasGanhas > 1 ? 's' : ''}`;
     document.getElementById('colorFeedback').className = 'color-feedback good';
     await adicionarMoedas(moedasGanhas);
+    await adicionarPontos('jogo', moedasGanhas * 2); // 2 pontos por moeda no jogo
     await new Promise(r => setTimeout(r, 900));
     if (colorGameState.playing) proximoNivelCores();
   }
@@ -1069,13 +1064,11 @@ function drawCarTopDown(ctx, x, y, angle) {
   ctx.translate(x, y);
   ctx.rotate(angle);
 
-  // Sombra
   ctx.fillStyle = 'rgba(0,0,0,0.4)';
   ctx.beginPath();
   ctx.roundRect(-25, -40, 50, 80, 10);
   ctx.fill();
 
-  // Carroceria
   ctx.fillStyle = '#fff';
   ctx.strokeStyle = '#000';
   ctx.lineWidth = 3;
@@ -1084,7 +1077,6 @@ function drawCarTopDown(ctx, x, y, angle) {
   ctx.fill();
   ctx.stroke();
 
-  // Capô e Teto
   ctx.fillStyle = '#e0e0e0';
   ctx.beginPath();
   ctx.roundRect(-20, -35, 40, 20, 8);
@@ -1103,7 +1095,6 @@ function drawCarTopDown(ctx, x, y, angle) {
   ctx.fill();
   ctx.stroke();
 
-  // Faróis
   ctx.fillStyle = '#ffeb3b';
   ctx.beginPath();
   ctx.arc(-15, -35, 5, 0, Math.PI*2);
@@ -1118,23 +1109,19 @@ function desenharCenaCarro() {
   
   ctx.clearRect(0, 0, canvasWidth, canvasHeight);
 
-  // Grama
   ctx.fillStyle = '#2d6a1c';
   ctx.fillRect(0, 0, canvasWidth, canvasHeight);
 
-  // Estrada
   const roadWidth = canvasWidth * 0.6;
   const roadStart = (canvasWidth - roadWidth) / 2;
   
   ctx.fillStyle = '#444';
   ctx.fillRect(roadStart, 0, roadWidth, canvasHeight);
   
-  // Bordas
   ctx.fillStyle = '#fff';
   ctx.fillRect(roadStart, 0, 8, canvasHeight);
   ctx.fillRect(roadStart + roadWidth - 8, 0, 8, canvasHeight);
 
-  // Faixas animadas
   ctx.fillStyle = '#ffd700';
   const lineOffset = (carGameState.roadOffset) % 60;
   
@@ -1144,7 +1131,6 @@ function desenharCenaCarro() {
     ctx.fillRect(roadStart + roadWidth * 0.66 - 4, y, 8, 30);
   }
 
-  // Movimento suave do carro
   const laneWidth = roadWidth / 3;
   const targetX = roadStart + (carGameState.lane * laneWidth) + (laneWidth / 2);
   
@@ -1153,7 +1139,6 @@ function desenharCenaCarro() {
 
   const carY = canvasHeight * 0.75;
 
-  // Desenha obstáculos e moedas
   carGameState.obstacles.forEach(obs => {
     if (obs.type === 'obstacle') {
       ctx.fillStyle = '#ff6b6b';
@@ -1182,7 +1167,6 @@ function desenharCenaCarro() {
     }
   });
 
-  // Desenha o carro (com leve inclinação ao trocar de pista)
   const visualAngle = (targetX - carGameState.carTargetX) * 0.005;
   drawCarTopDown(ctx, carGameState.carTargetX, carY, visualAngle);
 }
@@ -1190,11 +1174,9 @@ function desenharCenaCarro() {
 function tickCarro() {
   if (!carGameState.running) return;
 
-  // Move a estrada e a distância
   carGameState.roadOffset += carGameState.speed;
   carGameState.distance += carGameState.speed * 0.5;
 
-  // Gera novos itens
   if (Math.random() < 0.03) {
     const lane = Math.floor(Math.random() * 3);
     const roadWidth = canvasWidth * 0.6;
@@ -1211,12 +1193,10 @@ function tickCarro() {
     });
   }
 
-  // Move os itens para baixo
   carGameState.obstacles.forEach(obs => {
     obs.y += carGameState.speed * 1.5;
   });
 
-  // Colisão
   const carY = canvasHeight * 0.75;
   for (let i = carGameState.obstacles.length - 1; i >= 0; i--) {
     const obs = carGameState.obstacles[i];
@@ -1230,6 +1210,7 @@ function tickCarro() {
       if (obs.type === 'coin') {
         carGameState.coins++;
         adicionarMoedas(1);
+        adicionarPontos('jogo', 2); // 2 pontos por moeda
         mostrarToast('🪙 +1 moeda!');
         atualizarHUDCarro();
         carGameState.obstacles.splice(i, 1);
@@ -1279,7 +1260,7 @@ carWrapper.addEventListener('mousedown', handleCarInteraction);
 carWrapper.addEventListener('touchstart', handleCarInteraction, { passive: false });
 carWrapper.addEventListener('contextmenu', e => e.preventDefault());
 
-// --- DORMIR / REMÉDIO ---
+// --- CUIDADOS ---
 window.toggleDormir = async () => {
   const scene = document.getElementById('petMainScene');
   const btn = document.getElementById('btnDormir');
@@ -1287,6 +1268,10 @@ window.toggleDormir = async () => {
     isSleeping = true;
     scene.classList.add('sleeping');
     btn.innerHTML = '<span>☀️</span><small>Acordar</small>';
+    
+    // Adiciona pontos ao começar a dormir
+    await adicionarPontos('cuidado', 2);
+    
     sleepInterval = setInterval(async () => {
       if (!isSleeping || !petState) { clearInterval(sleepInterval); return; }
       if (petState.energia < 100) {
@@ -1305,33 +1290,70 @@ window.toggleDormir = async () => {
 window.usarRemedio = async () => {
   if (petState.saude >= 100) { mostrarToast('Ele já está saudável! 💜'); return; }
   animarBichinho('feliz');
-  await atualizarPet({ saude: Math.min(100, (petState.saude||0) + 20), pontos: (petState.pontos || 0) + 5 });
-  registrarRanking(5, usuarioAtual.nomeReal + ' ' + usuarioAtual.emoji);
-  mostrarToast('💊 Saúde recuperada!');
+  await atualizarPet({ saude: Math.min(100, (petState.saude||0) + 20) });
+  await adicionarPontos('cuidado', 5);
+  mostrarToast('💊 Saúde recuperada! +5 pts de cuidado');
 };
 
 // --- RANKING ---
-async function registrarRanking(pts, nome) {
-  if (!usuarioAtual) return;
-  await push(ref(database, 'scores'), { name: nome, score: pts, timestamp: Date.now() });
-}
-
-const topScoresQuery = query(ref(database, 'scores'), orderByChild('score'), limitToLast(10));
+const topScoresQuery = query(ref(database, 'bichinhos'), orderByChild('pontosJogos'));
 onValue(topScoresQuery, (snapshot) => {
   const rankingList = document.getElementById('rankingList');
   rankingList.innerHTML = '';
-  const scores = [];
-  snapshot.forEach(child => scores.push(child.val()));
-  if (scores.length === 0) {
-    rankingList.innerHTML = `<div class="ranking-empty"><span>🏆</span><p>O ranking ainda está vazio.</p><p style="font-size:0.85rem;margin-top:6px;">Joguem para aparecer aqui! 🎮</p></div>`;
+  const usersArray = [];
+
+  snapshot.forEach(child => {
+    const data = child.val();
+    const uid = child.key;
+    if (USERS[uid]) {
+      const pCuidado = data.pontosCuidado || 0;
+      const pJogos = data.pontosJogos || 0;
+      usersArray.push({
+        id: uid,
+        nome: USERS[uid].nomeReal,
+        emoji: USERS[uid].emoji,
+        cuidado: pCuidado,
+        jogos: pJogos,
+        total: pCuidado + pJogos
+      });
+    }
+  });
+
+  // Ordena pelo total
+  usersArray.sort((a, b) => b.total - a.total);
+
+  if (usersArray.length === 0) {
+    rankingList.innerHTML = `<div class="ranking-empty"><span>🏆</span><p>O ranking ainda está vazio.</p></div>`;
     return;
   }
-  scores.reverse().forEach((entrada, index) => {
-    const li = document.createElement('li');
-    const medalha = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `${index + 1}º`;
-    li.innerHTML = `<span>${medalha} ${entrada.name}</span><strong>${entrada.score}</strong>`;
-    rankingList.appendChild(li);
+
+  // Pódio (Top 1)
+  const top1 = usersArray[0];
+  const podioHtml = `
+    <div style="text-align: center; margin-bottom: 20px; background: rgba(255, 215, 0, 0.1); padding: 20px; border-radius: 16px; border: 1px solid rgba(255, 215, 0, 0.3);">
+      <h2 style="font-size: 2rem; margin-bottom: 5px;">🥇 ${top1.emoji} ${top1.nome}</h2>
+      <p style="font-size: 1.2rem; font-weight: 800; color: #ffd700;">${top1.total} Pontos Gerais</p>
+    </div>
+  `;
+  
+  let listHtml = '';
+  usersArray.forEach((user, index) => {
+    const isEven = index % 2 === 0;
+    listHtml += `
+      <li style="flex-direction: column; align-items: stretch; background: ${isEven ? 'rgba(62, 81, 184, 0.18)' : 'rgba(139, 92, 201, 0.08)'}; padding: 16px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+          <span style="font-size: 1.1rem; font-weight: 700; color: #fff;">${index + 1}º ${user.emoji} ${user.nome}</span>
+          <strong style="font-size: 1.2rem; color: #ffd700;">${user.total} Total</strong>
+        </div>
+        <div style="display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--texto-suave);">
+          <span>🎮 Jogos: <strong>${user.jogos}</strong></span>
+          <span>💖 Cuidado: <strong>${user.cuidado}</strong></span>
+        </div>
+      </li>
+    `;
   });
+
+  rankingList.innerHTML = podioHtml + listHtml;
 });
 
 // --- INICIALIZAÇÃO ---
